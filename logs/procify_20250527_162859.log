@@ -511,3 +511,30 @@
 2025-05-27 16:30:16,106 - INFO - New process detected - PID: 9080, Name: firefox.exe
 2025-05-27 16:30:22,024 - INFO - New process node created - PID: 9072, Name: FileCoAuth.exe, Parent PID: 596
 2025-05-27 16:30:22,025 - INFO - New process detected - PID: 9072, Name: FileCoAuth.exe
+2025-05-27 16:30:28,252 - INFO - Process terminated - PID: 9072, Name: FileCoAuth.exe
+2025-05-27 16:30:34,122 - INFO - New process node created - PID: 3152, Name: firefox.exe, Parent PID: 10652
+2025-05-27 16:30:34,124 - INFO - New process detected - PID: 3152, Name: firefox.exe
+2025-05-27 16:31:04,332 - INFO - Process terminated - PID: 2244, Name: firefox.exe
+2025-05-27 16:31:23,699 - INFO - Process terminated - PID: 9988, Name: firefox.exe
+2025-05-27 16:32:16,928 - INFO - New process node created - PID: 2416, Name: firefox.exe, Parent PID: 10652
+2025-05-27 16:32:16,929 - INFO - New process detected - PID: 2416, Name: firefox.exe
+2025-05-27 16:32:55,003 - INFO - Process terminated - PID: 18092, Name: firefox.exe
+2025-05-27 16:33:22,324 - INFO - New process node created - PID: 7596, Name: firefox.exe, Parent PID: 10652
+2025-05-27 16:33:22,325 - INFO - New process detected - PID: 7596, Name: firefox.exe
+2025-05-27 16:33:24,628 - INFO - Process terminated - PID: 16116, Name: conhost.exe
+2025-05-27 16:33:24,629 - INFO - Process terminated - PID: 17980, Name: powershell.exe
+2025-05-27 16:33:48,094 - INFO - Process terminated - PID: 5008, Name: svchost.exe
+2025-05-27 16:33:51,695 - INFO - Process terminated - PID: 9080, Name: firefox.exe
+2025-05-27 16:34:18,080 - INFO - New process node created - PID: 16220, Name: firefox.exe, Parent PID: 10652
+2025-05-27 16:34:18,081 - INFO - New process detected - PID: 16220, Name: firefox.exe
+2025-05-27 16:34:48,063 - INFO - Process terminated - PID: 3152, Name: firefox.exe
+2025-05-27 16:34:49,809 - INFO - Process terminated - PID: 12844, Name: smartscreen.exe
+2025-05-27 16:34:50,847 - INFO - Process terminated - PID: 9156, Name: svchost.exe
+2025-05-27 16:35:32,877 - INFO - Process terminated - PID: 11312, Name: svchost.exe
+2025-05-27 16:35:35,257 - INFO - New process node created - PID: 16180, Name: firefox.exe, Parent PID: 10652
+2025-05-27 16:35:35,258 - INFO - New process detected - PID: 16180, Name: firefox.exe
+2025-05-27 16:35:55,826 - INFO - New process node created - PID: 16644, Name: firefox.exe, Parent PID: 10652
+2025-05-27 16:35:55,827 - INFO - New process detected - PID: 16644, Name: firefox.exe
+2025-05-27 16:36:04,460 - INFO - Process terminated - PID: 2416, Name: firefox.exe
+2025-05-27 16:36:14,594 - INFO - Received escape key - shutting down
+2025-05-27 16:36:15,154 - INFO - Shutting down - Total processes monitored: 259
