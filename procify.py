@@ -8,11 +8,17 @@ import numpy as np
 from typing import Dict, List, Tuple
 import logging
 import os
+from scipy.io import wavfile
 
 # Set up logging
 log_dir = "logs"
 if not os.path.exists(log_dir):
     os.makedirs(log_dir)
+
+# Create sounds directory
+sounds_dir = "sounds"
+if not os.path.exists(sounds_dir):
+    os.makedirs(sounds_dir)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -52,10 +58,15 @@ class ProcessVisualizer:
     def __init__(self):
         logger.info("Initializing ProcessVisualizer")
         pygame.init()
+        pygame.mixer.init(44100, -16, 2, 1024)
+        
         self.width = 1200
         self.height = 800
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.set_caption("Procify - Process Visualization")
+        
+        # Generate sound effects
+        self.generate_sound_effects()
         
         self.clock = pygame.time.Clock()
         self.nodes: Dict[int, ProcessNode] = {}
@@ -72,8 +83,38 @@ class ProcessVisualizer:
         self.dragging = False
         self.last_mouse_pos = None
         self.new_process_highlight_duration = 5.0  # Seconds to highlight new processes
-        
+
         logger.info(f"ProcessVisualizer initialized with window size: {self.width}x{self.height}")
+
+    def generate_sound_effects(self):
+        """Generate ascending and descending ping sounds"""
+        sample_rate = 44100
+        duration = 0.1  # seconds
+        t = np.linspace(0, duration, int(sample_rate * duration))
+        
+        # Ascending ping (process start)
+        start_freq = 440
+        end_freq = 880
+        start_sound = np.sin(2 * np.pi * np.linspace(start_freq, end_freq, len(t)) * t)
+        # Convert to stereo by duplicating the mono channel and ensure C-contiguous
+        start_sound = np.ascontiguousarray(np.vstack((start_sound, start_sound)).T)
+        start_sound = np.int16(start_sound * 32767)
+        wavfile.write(os.path.join(sounds_dir, "process_start.wav"), sample_rate, start_sound)
+        
+        # Descending ping (process end)
+        end_sound = np.sin(2 * np.pi * np.linspace(end_freq, start_freq, len(t)) * t)
+        # Convert to stereo by duplicating the mono channel and ensure C-contiguous
+        end_sound = np.ascontiguousarray(np.vstack((end_sound, end_sound)).T)
+        end_sound = np.int16(end_sound * 32767)
+        wavfile.write(os.path.join(sounds_dir, "process_end.wav"), sample_rate, end_sound)
+        
+        # Load the sounds
+        self.start_sound = pygame.mixer.Sound(os.path.join(sounds_dir, "process_start.wav"))
+        self.end_sound = pygame.mixer.Sound(os.path.join(sounds_dir, "process_end.wav"))
+        
+        # Set volume
+        self.start_sound.set_volume(0.3)
+        self.end_sound.set_volume(0.3)
 
     def screen_to_world(self, screen_pos):
         """Convert screen coordinates to world coordinates"""
@@ -148,6 +189,8 @@ class ProcessVisualizer:
                     self.nodes[pid] = ProcessNode(pid, name, pos, current_time)
                     self.total_processes_monitored += 1
                     logger.info(f"New process detected - PID: {pid}, Name: {name}")
+                    # Play start sound
+                    self.start_sound.play()
 
             except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
                 logger.debug(f"Access error while monitoring process: {str(e)}")
@@ -157,29 +200,32 @@ class ProcessVisualizer:
         for pid in list(self.nodes.keys()):
             if pid not in current_pids:
                 node = self.nodes[pid]
-                if node.alpha == 255:
+                if node.alpha == 255:  # Only play sound when first detecting termination
                     logger.info(f"Process terminated - PID: {pid}, Name: {node.name}")
+                    self.end_sound.play()
                 node.alpha = max(0, node.alpha - 10)
                 if node.alpha <= 0:
                     del self.nodes[pid]
 
     def update_node_positions(self):
         for node in self.nodes.values():
-            dx = node.target_pos[0] - node.pos[0]
-            dy = node.target_pos[1] - node.pos[1]
-            
-            node.velocity[0] = dx * 0.1
-            node.velocity[1] = dy * 0.1
-            
-            node.pos[0] += node.velocity[0]
-            node.pos[1] += node.velocity[1]
+            # Only update positions for new or fading nodes
+            if node.is_new or node.alpha < 255:
+                dx = node.target_pos[0] - node.pos[0]
+                dy = node.target_pos[1] - node.pos[1]
+                
+                node.velocity[0] = dx * 0.1
+                node.velocity[1] = dy * 0.1
+                
+                node.pos[0] += node.velocity[0]
+                node.pos[1] += node.velocity[1]
 
     def draw(self):
         self.screen.fill((0, 0, 0))
 
-        # Draw connections first
+        # Only draw connections for new or fading processes
         for node in self.nodes.values():
-            if node.parent_pid in self.nodes:
+            if (node.is_new or node.alpha < 255) and node.parent_pid in self.nodes:
                 parent = self.nodes[node.parent_pid]
                 alpha = min(node.alpha, parent.alpha)
                 color = (*node.color[:3], alpha)
@@ -189,35 +235,41 @@ class ProcessVisualizer:
 
         # Draw nodes
         new_processes_count = 0
+        terminating_processes_count = 0
+        
         for node in self.nodes.values():
             if node.is_new:
                 new_processes_count += 1
+            if node.alpha < 255:
+                terminating_processes_count += 1
             
-            screen_pos = self.world_to_screen(node.pos)
-            
-            # Draw highlight for new processes
-            if node.is_new:
-                glow_radius = node.radius + 5 + math.sin(time.time() * 5) * 2
-                glow_color = (255, 255, 100, node.alpha)
-                pygame.draw.circle(self.screen, glow_color,
-                                 (int(screen_pos[0]), int(screen_pos[1])),
-                                 int(glow_radius * self.zoom))
+            # Only draw new or terminating processes
+            if node.is_new or node.alpha < 255:
+                screen_pos = self.world_to_screen(node.pos)
+                
+                # Draw highlight for new processes
+                if node.is_new:
+                    glow_radius = node.radius + 5 + math.sin(time.time() * 5) * 2
+                    glow_color = (255, 255, 100, node.alpha)
+                    pygame.draw.circle(self.screen, glow_color,
+                                     (int(screen_pos[0]), int(screen_pos[1])),
+                                     int(glow_radius * self.zoom))
 
-            # Draw node
-            color = (*node.color[:3], node.alpha)
-            pygame.draw.circle(self.screen, color,
-                             (int(screen_pos[0]), int(screen_pos[1])),
-                             int(node.radius * self.zoom))
-            
-            # Draw process name
-            if node.alpha > 128:
-                text_color = (255, 255, 100) if node.is_new else (200, 200, 200)
-                text = self.font.render(f"{node.name[:15]}", True, text_color)
-                text_pos = (screen_pos[0] + 10 * self.zoom, screen_pos[1] - 10 * self.zoom)
-                self.screen.blit(text, text_pos)
+                # Draw node
+                color = (*node.color[:3], node.alpha)
+                pygame.draw.circle(self.screen, color,
+                                 (int(screen_pos[0]), int(screen_pos[1])),
+                                 int(node.radius * self.zoom))
+                
+                # Draw process name
+                if node.alpha > 128:
+                    text_color = (255, 255, 100) if node.is_new else (200, 200, 200)
+                    text = self.font.render(f"{node.name} (PID: {node.pid})", True, text_color)
+                    text_pos = (screen_pos[0] + 10 * self.zoom, screen_pos[1] - 10 * self.zoom)
+                    self.screen.blit(text, text_pos)
 
         # Draw stats
-        stats_text = f"New Processes: {new_processes_count} | Total Active: {len(self.nodes)} | Zoom: {self.zoom:.1f}x"
+        stats_text = f"New: {new_processes_count} | Terminating: {terminating_processes_count} | Zoom: {self.zoom:.1f}x"
         stats_surface = self.font.render(stats_text, True, (200, 200, 200))
         self.screen.blit(stats_surface, (10, 10))
 

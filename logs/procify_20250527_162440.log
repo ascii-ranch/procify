@@ -1,0 +1,13 @@
+2025-05-27 16:24:40,938 - INFO - Starting Procify application
+2025-05-27 16:24:40,938 - INFO - Initializing ProcessVisualizer
+2025-05-27 16:24:41,439 - ERROR - Fatal error: Array must be 2-dimensional for stereo mixer
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 297, in <module>
+    visualizer = ProcessVisualizer()
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 68, in __init__
+    self.generate_sound_effects()
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 99, in generate_sound_effects
+    pygame.sndarray.make_sound(start_sound).save(os.path.join(sounds_dir, "process_start.wav"))
+  File "C:\Users\Station5\Documents\Python Scripts\procify\venv\lib\site-packages\pygame\sndarray.py", line 92, in make_sound
+    return mixer.Sound(array=array)
+ValueError: Array must be 2-dimensional for stereo mixer

@@ -1,0 +1,11 @@
+2025-05-27 16:25:45,683 - INFO - Starting Procify application
+2025-05-27 16:25:45,683 - INFO - Initializing ProcessVisualizer
+2025-05-27 16:25:46,205 - ERROR - Fatal error: 'pygame.mixer.Sound' object has no attribute 'save'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 301, in <module>
+    visualizer = ProcessVisualizer()
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 68, in __init__
+    self.generate_sound_effects()
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 101, in generate_sound_effects
+    pygame.sndarray.make_sound(start_sound).save(os.path.join(sounds_dir, "process_start.wav"))
+AttributeError: 'pygame.mixer.Sound' object has no attribute 'save'

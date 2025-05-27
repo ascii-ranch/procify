@@ -1,0 +1,13 @@
+2025-05-27 16:25:14,350 - INFO - Starting Procify application
+2025-05-27 16:25:14,350 - INFO - Initializing ProcessVisualizer
+2025-05-27 16:25:14,866 - ERROR - Fatal error: ndarray is not C-contiguous
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 301, in <module>
+    visualizer = ProcessVisualizer()
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 68, in __init__
+    self.generate_sound_effects()
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 101, in generate_sound_effects
+    pygame.sndarray.make_sound(start_sound).save(os.path.join(sounds_dir, "process_start.wav"))
+  File "C:\Users\Station5\Documents\Python Scripts\procify\venv\lib\site-packages\pygame\sndarray.py", line 92, in make_sound
+    return mixer.Sound(array=array)
+ValueError: ndarray is not C-contiguous
