@@ -39,7 +39,7 @@ class ProcessNode:
         self.name = name
         self.pos = list(pos)
         self.target_pos = list(pos)  # Only used for new processes
-        self.velocity = [0, 0]
+        self.velocity = [0.0, 0.0]  # Initialize velocity vector
         self.creation_time = creation_time
         self.alpha = 255
         self.radius = 5
@@ -165,8 +165,8 @@ class ProcessVisualizer:
             self.drag_offset = (0, 0)
             self.titlebar_height = 30
             self.min_edge_length = 150
-            self.repulsion_strength = 1000  # Reduced from 2000
-            self.attraction_strength = 0.05  # Reduced from 0.1
+            self.repulsion_strength = 500
+            self.attraction_strength = 0.03
             self.max_edge_length = 300
             self.animation_speed = 0.1  # Reduced from 0.2
             
@@ -186,15 +186,26 @@ class ProcessVisualizer:
             
             self.offset_x = 0
             self.offset_y = 0
+            self.target_offset_x = 0
+            self.target_offset_y = 0
             self.zoom = 1.0
             self.dragging = False
             self.last_mouse_pos = None
+            self.drag_velocity = [0, 0]
+            self.drag_smoothing = 0.8
+            self.physics_smoothing = 0.15
+            self.show_parent_edges = True
             
             # IP frequency tracking
             self.ip_frequencies = {}
             self.ip_bar_width = 200  # Width of the bar graph area
             self.ip_bar_margin = 5  # Margin between bars
             self.max_ip_bars = 20  # Maximum number of IPs to show in the bar graph
+            
+            # Physics parameters tuning
+            self.max_force = 2.0
+            self.damping = 0.92
+            self.edge_color = (0.4, 0.4, 0.8, 0.6)  # New: Color for parent edges
             
         except Exception as e:
             logger.error(f"Failed to initialize ProcessVisualizer: {str(e)}")
@@ -264,7 +275,7 @@ class ProcessVisualizer:
 
     def handle_input(self):
         current_time = time.time()
-        self.delta_time = min(current_time - self.last_frame_time, 0.1)  # Cap at 100ms
+        self.delta_time = min(current_time - self.last_frame_time, 0.1)
         self.last_frame_time = current_time
 
         for event in pygame.event.get():
@@ -279,9 +290,10 @@ class ProcessVisualizer:
                     self.show_network = not self.show_network
                 elif event.key == pygame.K_s:
                     self.show_stats = not self.show_stats
-                elif event.key == pygame.K_b:  # Toggle bar graph with 'B' key
+                elif event.key == pygame.K_b:
                     self.show_bar_graph = not self.show_bar_graph
-                    logger.info(f"Bar graph {'shown' if self.show_bar_graph else 'hidden'}")
+                elif event.key == pygame.K_p:  # New: Toggle parent edges
+                    self.show_parent_edges = not self.show_parent_edges
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
@@ -291,6 +303,8 @@ class ProcessVisualizer:
                     else:
                         self.dragging = True
                         self.last_mouse_pos = event.pos
+                        # Reset velocities when starting drag
+                        self.drag_velocity = [0, 0]
                 elif event.button == 4:
                     self.zoom *= 1.1
                 elif event.button == 5:
@@ -299,6 +313,8 @@ class ProcessVisualizer:
                 if event.button == 1:
                     self.window_drag = False
                     self.dragging = False
+                    # Minimal momentum on release
+                    self.drag_velocity = [x * 0.1 for x in self.drag_velocity]
             elif event.type == pygame.MOUSEMOTION:
                 if self.window_drag:
                     new_pos = pygame.mouse.get_pos()
@@ -316,8 +332,10 @@ class ProcessVisualizer:
                 elif self.dragging:
                     dx = event.pos[0] - self.last_mouse_pos[0]
                     dy = event.pos[1] - self.last_mouse_pos[1]
-                    self.offset_x += dx / self.zoom
-                    self.offset_y += dy / self.zoom
+                    # Direct position update with minimal smoothing
+                    self.target_offset_x = self.offset_x + dx / self.zoom
+                    self.target_offset_y = self.offset_y + dy / self.zoom
+                    self.drag_velocity = [dx / self.zoom * 0.1, dy / self.zoom * 0.1]  # Reduced velocity impact
                     self.last_mouse_pos = event.pos
             elif event.type == pygame.VIDEORESIZE:
                 # Enforce minimum window size
@@ -385,24 +403,43 @@ class ProcessVisualizer:
         except Exception as e:
             logger.error(f"Error drawing line: {str(e)}", exc_info=True)
 
+    def update_camera(self):
+        """Smoothly update camera position with reduced lag"""
+        if not self.dragging:
+            # Minimal momentum when not dragging
+            self.drag_velocity = [v * 0.8 for v in self.drag_velocity]  # Faster velocity decay
+            self.target_offset_x += self.drag_velocity[0]
+            self.target_offset_y += self.drag_velocity[1]
+        
+        # Quick response to target position
+        dx = self.target_offset_x - self.offset_x
+        dy = self.target_offset_y - self.offset_y
+        
+        # Limit maximum position change per frame
+        max_delta = 20.0 / self.zoom  # Adjusted for zoom level
+        dx = max(min(dx, max_delta), -max_delta)
+        dy = max(min(dy, max_delta), -max_delta)
+        
+        self.offset_x += dx * self.drag_smoothing
+        self.offset_y += dy * self.drag_smoothing
+
     def apply_layout_forces(self):
-        """Apply force-directed layout with fixed timestep"""
+        """Apply force-directed layout with improved physics"""
         if not self.nodes:
             return
             
         forces = {pid: [0, 0] for pid in self.nodes}
         
-        # Define boundaries
+        # Define boundaries with some elasticity
         boundary_margin = 100
         min_x = -self.width/2/self.zoom + boundary_margin
         max_x = self.width/2/self.zoom - boundary_margin
         min_y = -self.height/2/self.zoom + boundary_margin
         max_y = self.height/2/self.zoom - boundary_margin
         
-        # Apply forces with fixed timestep
         dt = self.fixed_time_step / 1000.0  # Convert to seconds
         
-        # Apply repulsion between visible nodes only
+        # Apply forces with improved physics
         visible_nodes = [node for pid, node in self.nodes.items() if pid in self.visible_processes]
         for i, node1 in enumerate(visible_nodes):
             for node2 in visible_nodes[i+1:]:
@@ -410,7 +447,10 @@ class ProcessVisualizer:
                 dy = node1.pos[1] - node2.pos[1]
                 distance = math.sqrt(dx*dx + dy*dy) + 0.1
                 
-                force = self.repulsion_strength / (distance * distance)
+                # Smoother force falloff
+                force = self.repulsion_strength / (distance * distance + 1.0)
+                force = min(force, self.max_force)  # Cap maximum force
+                
                 fx = force * dx / distance
                 fy = force * dy / distance
                 
@@ -419,7 +459,7 @@ class ProcessVisualizer:
                 forces[node2.pid][0] -= fx
                 forces[node2.pid][1] -= fy
         
-        # Apply attraction for connected nodes
+        # Apply attraction with smoother spring forces
         for node in visible_nodes:
             if node.parent_pid in self.nodes:
                 parent = self.nodes[node.parent_pid]
@@ -428,30 +468,45 @@ class ProcessVisualizer:
                 distance = math.sqrt(dx*dx + dy*dy) + 0.1
                 
                 if distance > self.min_edge_length:
-                    force = self.attraction_strength * (distance - self.min_edge_length)
-                    forces[node.pid][0] += force * dx / distance
-                    forces[node.pid][1] += force * dy / distance
+                    # Smoother spring force
+                    force = self.attraction_strength * math.pow(distance - self.min_edge_length, 0.8)
+                    force = min(force, self.max_force)
+                    
+                    fx = force * dx / distance
+                    fy = force * dy / distance
+                    
+                    forces[node.pid][0] += fx
+                    forces[node.pid][1] += fy
         
-        # Apply forces with damping
-        damping = 0.8
+        # Apply forces with improved damping and smoothing
         for pid, node in self.nodes.items():
             if not node.is_new and pid in self.visible_processes:
-                force_x = forces[pid][0] * damping
-                force_y = forces[pid][1] * damping
+                # Apply damping to current velocity
+                node.velocity[0] *= self.damping
+                node.velocity[1] *= self.damping
                 
-                # Limit maximum force
-                force_magnitude = math.sqrt(force_x*force_x + force_y*force_y)
-                if force_magnitude > 5:
-                    force_x *= 5/force_magnitude
-                    force_y *= 5/force_magnitude
+                # Add force to velocity
+                force_x = forces[pid][0]
+                force_y = forces[pid][1]
                 
-                # Update position with fixed timestep
-                node.pos[0] += force_x * self.animation_speed * dt
-                node.pos[1] += force_y * self.animation_speed * dt
+                # Smooth force application
+                node.velocity[0] += force_x * self.physics_smoothing * dt
+                node.velocity[1] += force_y * self.physics_smoothing * dt
                 
-                # Apply boundary constraints
-                node.pos[0] = max(min_x, min(max_x, node.pos[0]))
-                node.pos[1] = max(min_y, min(max_y, node.pos[1]))
+                # Update position with velocity
+                node.pos[0] += node.velocity[0] * dt
+                node.pos[1] += node.velocity[1] * dt
+                
+                # Elastic boundary constraints
+                if node.pos[0] < min_x:
+                    node.velocity[0] += (min_x - node.pos[0]) * 0.1
+                elif node.pos[0] > max_x:
+                    node.velocity[0] += (max_x - node.pos[0]) * 0.1
+                    
+                if node.pos[1] < min_y:
+                    node.velocity[1] += (min_y - node.pos[1]) * 0.1
+                elif node.pos[1] > max_y:
+                    node.velocity[1] += (max_y - node.pos[1]) * 0.1
 
     def update_processes(self):
         """Update process data at fixed intervals"""
@@ -628,6 +683,19 @@ class ProcessVisualizer:
                             current_pid = self.nodes[current_pid].parent_pid
                             visible_processes.add(current_pid)
 
+            # Draw parent-child edges first (so they appear behind nodes)
+            if self.show_parent_edges:
+                for node in self.nodes.values():
+                    if node.pid in visible_processes and node.parent_pid in self.nodes:
+                        parent = self.nodes[node.parent_pid]
+                        if parent.pid in visible_processes:
+                            start_pos = self.world_to_screen(node.pos)
+                            end_pos = self.world_to_screen(parent.pos)
+                            # Draw edge with alpha based on node alpha
+                            edge_alpha = min(node.alpha, parent.alpha) / 255.0
+                            edge_color = (*self.edge_color[:3], edge_alpha)
+                            self.draw_line(start_pos, end_pos, edge_color, 1)
+
             # Draw network connections
             if self.show_network:
                 logger.debug("Drawing network connections")
@@ -718,7 +786,7 @@ class ProcessVisualizer:
             self.text_surface.blit(stats_surface, (10, 10))
 
             # Draw controls help
-            help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | ESC = Exit"
+            help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | P = Toggle Parent Edges | ESC = Exit"
             help_surface = self.font.render(help_text, True, (150, 150, 150))
             self.text_surface.blit(help_surface, (10, self.height - 30))
 
@@ -738,7 +806,7 @@ class ProcessVisualizer:
             logger.error(f"Error in draw method: {str(e)}", exc_info=True)
 
     def run(self):
-        """Main loop with fixed timestep for physics"""
+        """Main loop with improved timing"""
         logger.info("Starting process visualization")
         try:
             # Initial process population
@@ -760,6 +828,9 @@ class ProcessVisualizer:
                 # Handle input
                 self.handle_input()
                 
+                # Update camera position
+                self.update_camera()
+                
                 # Update processes at fixed interval
                 self.update_processes()
                 
@@ -767,9 +838,15 @@ class ProcessVisualizer:
                 self.animation_accumulator += dt
                 
                 # Update physics with fixed timestep
-                while self.animation_accumulator >= self.fixed_time_step:
+                num_steps = 0
+                while self.animation_accumulator >= self.fixed_time_step and num_steps < 3:
                     self.apply_layout_forces()
                     self.animation_accumulator -= self.fixed_time_step
+                    num_steps += 1
+                
+                # If we're falling behind, drop frames rather than spiral
+                if self.animation_accumulator > self.fixed_time_step * 3:
+                    self.animation_accumulator = 0
                 
                 # Render
                 self.draw()
