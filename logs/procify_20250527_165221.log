@@ -1,0 +1,12 @@
+2025-05-27 16:52:21,895 - INFO - Starting Procify application
+2025-05-27 16:52:21,895 - INFO - Initializing ProcessVisualizer
+2025-05-27 16:52:22,310 - INFO - ProcessVisualizer initialized with window size: 1200x800
+2025-05-27 16:52:22,316 - INFO - Starting process visualization
+2025-05-27 16:52:22,320 - ERROR - Error during visualization: local variable 'text_boxes' referenced before assignment
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 547, in run
+    self.draw()
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 484, in draw
+    for i, box1 in enumerate(text_boxes):
+UnboundLocalError: local variable 'text_boxes' referenced before assignment
+2025-05-27 16:52:22,327 - INFO - Shutting down - Total processes monitored: 0

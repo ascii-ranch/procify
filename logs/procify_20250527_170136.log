@@ -1,0 +1,289 @@
+2025-05-27 17:01:36,403 - INFO - Starting Procify application
+2025-05-27 17:01:36,403 - INFO - Initializing ProcessVisualizer
+2025-05-27 17:01:36,973 - INFO - ProcessVisualizer initialized with window size: 1200x800
+2025-05-27 17:01:36,977 - INFO - Starting process visualization
+2025-05-27 17:01:37,597 - INFO - Initial process node created - PID: 0, Name: System Idle Process, Parent PID: 0
+2025-05-27 17:01:37,631 - INFO - Initial process node created - PID: 14848, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:37,655 - INFO - Initial process node created - PID: 4, Name: System, Parent PID: 0
+2025-05-27 17:01:37,680 - INFO - Initial process node created - PID: 4100, Name: IPROSetMonitor.exe, Parent PID: 828
+2025-05-27 17:01:37,705 - INFO - Initial process node created - PID: 7172, Name: conhost.exe, Parent PID: 6868
+2025-05-27 17:01:37,713 - INFO - Initial process node created - PID: 8196, Name: audiodg.exe, Parent PID: 2768
+2025-05-27 17:01:37,738 - INFO - Initial process node created - PID: 8, Name: WUDFHost.exe, Parent PID: 828
+2025-05-27 17:01:37,748 - INFO - Initial process node created - PID: 7688, Name: RuntimeBroker.exe, Parent PID: 596
+2025-05-27 17:01:37,773 - INFO - Initial process node created - PID: 12292, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:37,783 - INFO - Initial process node created - PID: 6156, Name: AcroCEF.exe, Parent PID: 16628
+2025-05-27 17:01:37,812 - INFO - Initial process node created - PID: 3088, Name: esif_uf.exe, Parent PID: 828
+2025-05-27 17:01:37,838 - INFO - Initial process node created - PID: 11280, Name: SupportAssistAgent.exe, Parent PID: 828
+2025-05-27 17:01:37,865 - INFO - Initial process node created - PID: 2068, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:37,891 - INFO - Initial process node created - PID: 1056, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:37,915 - INFO - Initial process node created - PID: 2084, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:37,937 - INFO - Initial process node created - PID: 2092, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:37,963 - INFO - Initial process node created - PID: 3116, Name: EvtEng.exe, Parent PID: 828
+2025-05-27 17:01:37,987 - INFO - Initial process node created - PID: 4140, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,015 - INFO - Initial process node created - PID: 4652, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,039 - INFO - Initial process node created - PID: 560, Name: fontdrvhost.exe, Parent PID: 756
+2025-05-27 17:01:38,064 - INFO - Initial process node created - PID: 1584, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,088 - INFO - Initial process node created - PID: 12332, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,096 - INFO - Initial process node created - PID: 4152, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:38,122 - INFO - Initial process node created - PID: 13880, Name: DDVRulesProcessor.exe, Parent PID: 828
+2025-05-27 17:01:38,131 - INFO - Initial process node created - PID: 1596, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:38,156 - INFO - Initial process node created - PID: 4156, Name: MpDefenderCoreService.exe, Parent PID: 828
+2025-05-27 17:01:38,183 - INFO - Initial process node created - PID: 576, Name: smss.exe, Parent PID: 4
+2025-05-27 17:01:38,208 - INFO - Initial process node created - PID: 2112, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,219 - INFO - Initial process node created - PID: 8256, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:38,228 - INFO - Initial process node created - PID: 13376, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:38,254 - INFO - Initial process node created - PID: 1092, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,281 - INFO - Initial process node created - PID: 8260, Name: PresentationFontCache.exe, Parent PID: 828
+2025-05-27 17:01:38,288 - INFO - Initial process node created - PID: 9284, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:38,297 - INFO - Initial process node created - PID: 12868, Name: conhost.exe, Parent PID: 8292
+2025-05-27 17:01:38,323 - INFO - Initial process node created - PID: 14404, Name: DDVCollectorSvcApi.exe, Parent PID: 828
+2025-05-27 17:01:38,350 - INFO - Initial process node created - PID: 4684, Name: WMIRegistrationService.exe, Parent PID: 828
+2025-05-27 17:01:38,378 - INFO - Initial process node created - PID: 10320, Name: NisSrv.exe, Parent PID: 828
+2025-05-27 17:01:38,403 - INFO - Initial process node created - PID: 14928, Name: SecurityHealthService.exe, Parent PID: 828
+2025-05-27 17:01:38,430 - INFO - Initial process node created - PID: 596, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,438 - INFO - Initial process node created - PID: 11348, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,465 - INFO - Initial process node created - PID: 1112, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,473 - INFO - Initial process node created - PID: 3164, Name: conhost.exe, Parent PID: 8292
+2025-05-27 17:01:38,501 - INFO - Initial process node created - PID: 6236, Name: WmiPrvSE.exe, Parent PID: 596
+2025-05-27 17:01:38,510 - INFO - Initial process node created - PID: 4704, Name: Cursor.exe, Parent PID: 1136
+2025-05-27 17:01:38,536 - INFO - Initial process node created - PID: 100, Name: Registry, Parent PID: 4
+2025-05-27 17:01:38,546 - INFO - Initial process node created - PID: 8292, Name: Cursor.exe, Parent PID: 1136
+2025-05-27 17:01:38,572 - INFO - Initial process node created - PID: 3692, Name: AggregatorHost.exe, Parent PID: 4000
+2025-05-27 17:01:38,600 - INFO - Initial process node created - PID: 4204, Name: jhi_service.exe, Parent PID: 828
+2025-05-27 17:01:38,629 - INFO - Initial process node created - PID: 9836, Name: updater.exe, Parent PID: 4872
+2025-05-27 17:01:38,638 - INFO - Initial process node created - PID: 1136, Name: Cursor.exe, Parent PID: 8840
+2025-05-27 17:01:38,667 - INFO - Initial process node created - PID: 1140, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,675 - INFO - Initial process node created - PID: 11892, Name: GWIdlMon.exe, Parent PID: 3308
+2025-05-27 17:01:38,703 - INFO - Initial process node created - PID: 13428, Name: ServiceShell.exe, Parent PID: 828
+2025-05-27 17:01:38,732 - INFO - Initial process node created - PID: 2680, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,759 - INFO - Initial process node created - PID: 6780, Name: Dell.CoreServices.Client.exe, Parent PID: 3948
+2025-05-27 17:01:38,786 - INFO - Initial process node created - PID: 8316, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,796 - INFO - Initial process node created - PID: 11900, Name: conhost.exe, Parent PID: 11892
+2025-05-27 17:01:38,803 - INFO - Initial process node created - PID: 10368, Name: SDXHelper.exe, Parent PID: 596
+2025-05-27 17:01:38,812 - INFO - Initial process node created - PID: 13952, Name: UserOOBEBroker.exe, Parent PID: 596
+2025-05-27 17:01:38,821 - INFO - Initial process node created - PID: 2180, Name: dllhost.exe, Parent PID: 596
+2025-05-27 17:01:38,850 - INFO - Initial process node created - PID: 4228, Name: dasHost.exe, Parent PID: 3960
+2025-05-27 17:01:38,880 - INFO - Initial process node created - PID: 7812, Name: SearchIndexer.exe, Parent PID: 828
+2025-05-27 17:01:38,889 - INFO - Initial process node created - PID: 648, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,899 - INFO - Initial process node created - PID: 8840, Name: explorer.exe, Parent PID: 8788
+2025-05-27 17:01:38,928 - INFO - Initial process node created - PID: 13960, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:38,963 - INFO - Initial process node created - PID: 2700, Name: conhost.exe, Parent PID: 7044
+2025-05-27 17:01:38,996 - INFO - Initial process node created - PID: 7820, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,024 - INFO - Initial process node created - PID: 8332, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,035 - INFO - Initial process node created - PID: 15500, Name: AdobeCollabSync.exe, Parent PID: 15560
+2025-05-27 17:01:39,067 - INFO - Initial process node created - PID: 1680, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,077 - INFO - Initial process node created - PID: 5264, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:39,111 - INFO - Initial process node created - PID: 5776, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,121 - INFO - Initial process node created - PID: 14992, Name: Cursor.exe, Parent PID: 1136
+2025-05-27 17:01:39,156 - INFO - Initial process node created - PID: 7316, Name: Dell.TechHub.DataManager.SubAgent.exe, Parent PID: 3948
+2025-05-27 17:01:39,166 - INFO - Initial process node created - PID: 16532, Name: Cursor.exe, Parent PID: 14992
+2025-05-27 17:01:39,198 - INFO - Initial process node created - PID: 664, Name: csrss.exe, Parent PID: 652
+2025-05-27 17:01:39,208 - INFO - Initial process node created - PID: 9880, Name: RuntimeBroker.exe, Parent PID: 596
+2025-05-27 17:01:39,223 - INFO - Initial process node created - PID: 11416, Name: RuntimeBroker.exe, Parent PID: 596
+2025-05-27 17:01:39,235 - INFO - Initial process node created - PID: 11928, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:39,245 - INFO - Initial process node created - PID: 2716, Name: soffice.bin, Parent PID: 15000
+2025-05-27 17:01:39,256 - INFO - Initial process node created - PID: 15000, Name: soffice.exe, Parent PID: 16788
+2025-05-27 17:01:39,268 - INFO - Initial process node created - PID: 16028, Name: Acrobat.exe, Parent PID: 17068
+2025-05-27 17:01:39,280 - INFO - Initial process node created - PID: 17560, Name: python.exe, Parent PID: 3384
+2025-05-27 17:01:39,314 - INFO - Initial process node created - PID: 3240, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,348 - INFO - Initial process node created - PID: 7336, Name: Dell.TechHub.Instrumentation.SubAgent.exe, Parent PID: 3948
+2025-05-27 17:01:39,359 - INFO - Initial process node created - PID: 15016, Name: AcroCEF.exe, Parent PID: 16628
+2025-05-27 17:01:39,369 - INFO - Initial process node created - PID: 17068, Name: Acrobat.exe, Parent PID: 8840
+2025-05-27 17:01:39,403 - INFO - Initial process node created - PID: 5808, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,413 - INFO - Initial process node created - PID: 11440, Name: CompPkgSrv.exe, Parent PID: 596
+2025-05-27 17:01:39,424 - INFO - Initial process node created - PID: 13488, Name: ApplicationFrameHost.exe, Parent PID: 596
+2025-05-27 17:01:39,460 - INFO - Initial process node created - PID: 692, Name: fontdrvhost.exe, Parent PID: 892
+2025-05-27 17:01:39,493 - INFO - Initial process node created - PID: 2228, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,527 - INFO - Initial process node created - PID: 7348, Name: conhost.exe, Parent PID: 7316
+2025-05-27 17:01:39,537 - INFO - Initial process node created - PID: 11956, Name: msedgewebview2.exe, Parent PID: 11612
+2025-05-27 17:01:39,549 - INFO - Initial process node created - PID: 3256, Name: Cursor.exe, Parent PID: 1136
+2025-05-27 17:01:39,582 - INFO - Initial process node created - PID: 8376, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,594 - INFO - Initial process node created - PID: 12468, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:39,605 - INFO - Initial process node created - PID: 6332, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:39,641 - INFO - Initial process node created - PID: 1732, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,673 - INFO - Initial process node created - PID: 4804, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,705 - INFO - Initial process node created - PID: 7364, Name: conhost.exe, Parent PID: 7336
+2025-05-27 17:01:39,748 - INFO - Initial process node created - PID: 7876, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,763 - INFO - Initial process node created - PID: 14532, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,777 - INFO - Initial process node created - PID: 15560, Name: AdobeCollabSync.exe, Parent PID: 9044
+2025-05-27 17:01:39,821 - INFO - Initial process node created - PID: 3788, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,863 - INFO - Initial process node created - PID: 4300, Name: AuActMon.exe, Parent PID: 3868
+2025-05-27 17:01:39,875 - INFO - Initial process node created - PID: 7164, Name: Cursor.exe, Parent PID: 1136
+2025-05-27 17:01:39,920 - INFO - Initial process node created - PID: 2768, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:39,960 - INFO - Initial process node created - PID: 5840, Name: Dell.Update.SubAgent.exe, Parent PID: 3948
+2025-05-27 17:01:40,000 - INFO - Initial process node created - PID: 6868, Name: Dell.TechHub.Analytics.SubAgent.exe, Parent PID: 3948
+2025-05-27 17:01:40,013 - INFO - Initial process node created - PID: 11988, Name: ShellExperienceHost.exe, Parent PID: 596
+2025-05-27 17:01:40,053 - INFO - Initial process node created - PID: 2264, Name: MemCompression, Parent PID: 4
+2025-05-27 17:01:40,097 - INFO - Initial process node created - PID: 7392, Name: updater.exe, Parent PID: 7648
+2025-05-27 17:01:40,110 - INFO - Initial process node created - PID: 11488, Name: WavesSvc64.exe, Parent PID: 8840
+2025-05-27 17:01:40,157 - INFO - Initial process node created - PID: 12000, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:40,201 - INFO - Initial process node created - PID: 4328, Name: AuDBServer.exe, Parent PID: 3868
+2025-05-27 17:01:40,240 - INFO - Initial process node created - PID: 4840, Name: conhost.exe, Parent PID: 5840
+2025-05-27 17:01:40,278 - INFO - Initial process node created - PID: 3308, Name: GWCtlSrv.exe, Parent PID: 828
+2025-05-27 17:01:40,290 - INFO - Initial process node created - PID: 9964, Name: StartMenuExperienceHost.exe, Parent PID: 596
+2025-05-27 17:01:40,304 - INFO - Initial process node created - PID: 18156, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:40,355 - INFO - Initial process node created - PID: 7920, Name: dllhost.exe, Parent PID: 596
+2025-05-27 17:01:40,367 - INFO - Initial process node created - PID: 12016, Name: AcroCEF.exe, Parent PID: 16628
+2025-05-27 17:01:40,382 - INFO - Initial process node created - PID: 17136, Name: CalculatorApp.exe, Parent PID: 6616
+2025-05-27 17:01:40,421 - INFO - Initial process node created - PID: 756, Name: wininit.exe, Parent PID: 652
+2025-05-27 17:01:40,460 - INFO - Initial process node created - PID: 2292, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:40,471 - INFO - Initial process node created - PID: 16628, Name: AcroCEF.exe, Parent PID: 17068
+2025-05-27 17:01:40,484 - INFO - Initial process node created - PID: 7416, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:40,497 - INFO - Initial process node created - PID: 8440, Name: igfxEM.exe, Parent PID: 2408
+2025-05-27 17:01:40,536 - INFO - Initial process node created - PID: 764, Name: csrss.exe, Parent PID: 748
+2025-05-27 17:01:40,572 - INFO - Initial process node created - PID: 5884, Name: unsecapp.exe, Parent PID: 596
+2025-05-27 17:01:40,585 - INFO - Initial process node created - PID: 14076, Name: Cursor.exe, Parent PID: 14992
+2025-05-27 17:01:40,628 - INFO - Initial process node created - PID: 1280, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:40,639 - INFO - Initial process node created - PID: 4864, Name: RuntimeBroker.exe, Parent PID: 596
+2025-05-27 17:01:40,678 - INFO - Initial process node created - PID: 1796, Name: IntelCpHeciSvc.exe, Parent PID: 828
+2025-05-27 17:01:40,690 - INFO - Initial process node created - PID: 776, Name: TextInputHost.exe, Parent PID: 596
+2025-05-27 17:01:40,731 - INFO - Initial process node created - PID: 1288, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:40,768 - INFO - Initial process node created - PID: 1292, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:40,805 - INFO - Initial process node created - PID: 3344, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:40,818 - INFO - Initial process node created - PID: 12048, Name: msedgewebview2.exe, Parent PID: 11612
+2025-05-27 17:01:40,831 - INFO - Initial process node created - PID: 12052, Name: msedgewebview2.exe, Parent PID: 11612
+2025-05-27 17:01:40,845 - INFO - Initial process node created - PID: 792, Name: Cursor.exe, Parent PID: 1136
+2025-05-27 17:01:40,859 - INFO - Initial process node created - PID: 7960, Name: taskhostw.exe, Parent PID: 1732
+2025-05-27 17:01:40,871 - INFO - Initial process node created - PID: 10008, Name: msedgewebview2.exe, Parent PID: 11612
+2025-05-27 17:01:40,884 - INFO - Initial process node created - PID: 11544, Name: RuntimeBroker.exe, Parent PID: 596
+2025-05-27 17:01:40,922 - INFO - Initial process node created - PID: 3868, Name: AuWatchDogService.exe, Parent PID: 828
+2025-05-27 17:01:40,961 - INFO - Initial process node created - PID: 4380, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:40,997 - INFO - Initial process node created - PID: 5916, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,009 - INFO - Initial process node created - PID: 13084, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:41,063 - INFO - Initial process node created - PID: 3876, Name: armsvc.exe, Parent PID: 828
+2025-05-27 17:01:41,110 - INFO - Initial process node created - PID: 7972, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,185 - INFO - Initial process node created - PID: 1832, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,230 - INFO - Initial process node created - PID: 2856, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,305 - INFO - Initial process node created - PID: 3884, Name: OfficeClickToRun.exe, Parent PID: 828
+2025-05-27 17:01:41,351 - INFO - Initial process node created - PID: 2864, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,409 - INFO - Initial process node created - PID: 3376, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,444 - INFO - Initial process node created - PID: 4400, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,480 - INFO - Initial process node created - PID: 9012, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,517 - INFO - Initial process node created - PID: 14132, Name: IAStorDataMgrSvc.exe, Parent PID: 828
+2025-05-27 17:01:41,553 - INFO - Initial process node created - PID: 2872, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,565 - INFO - Initial process node created - PID: 3384, Name: python.exe, Parent PID: 10100
+2025-05-27 17:01:41,603 - INFO - Initial process node created - PID: 3896, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,640 - INFO - Initial process node created - PID: 4408, Name: conhost.exe, Parent PID: 4328
+2025-05-27 17:01:41,679 - INFO - Initial process node created - PID: 828, Name: services.exe, Parent PID: 756
+2025-05-27 17:01:41,717 - INFO - Initial process node created - PID: 2368, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,728 - INFO - Initial process node created - PID: 9024, Name: Cursor.exe, Parent PID: 1136
+2025-05-27 17:01:41,739 - INFO - Initial process node created - PID: 12100, Name: DuckDuckGo.exe, Parent PID: 11940
+2025-05-27 17:01:41,753 - INFO - Initial process node created - PID: 2888, Name: AcroCEF.exe, Parent PID: 16628
+2025-05-27 17:01:41,765 - INFO - Initial process node created - PID: 4936, Name: AcroCEF.exe, Parent PID: 16628
+2025-05-27 17:01:41,777 - INFO - Initial process node created - PID: 13128, Name: powershell.exe, Parent PID: 8292
+2025-05-27 17:01:41,788 - INFO - Initial process node created - PID: 3404, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:41,800 - INFO - Initial process node created - PID: 12108, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:41,833 - INFO - Initial process node created - PID: 8016, Name: Dell.TechHub.Instrumentation.UserProcess.exe, Parent PID: 7336
+2025-05-27 17:01:41,866 - INFO - Initial process node created - PID: 13140, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,899 - INFO - Initial process node created - PID: 4440, Name: mDNSResponder.exe, Parent PID: 828
+2025-05-27 17:01:41,929 - INFO - Initial process node created - PID: 13656, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,959 - INFO - Initial process node created - PID: 2908, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,988 - INFO - Initial process node created - PID: 8540, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:41,998 - INFO - Initial process node created - PID: 11612, Name: msedgewebview2.exe, Parent PID: 12100
+2025-05-27 17:01:42,007 - INFO - Initial process node created - PID: 15708, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:42,039 - INFO - Initial process node created - PID: 4448, Name: TbtP2pShortcutService.exe, Parent PID: 828
+2025-05-27 17:01:42,049 - INFO - Initial process node created - PID: 9568, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,059 - INFO - Initial process node created - PID: 11616, Name: AuTray.exe, Parent PID: 8840
+2025-05-27 17:01:42,090 - INFO - Initial process node created - PID: 2408, Name: igfxCUIService.exe, Parent PID: 828
+2025-05-27 17:01:42,120 - INFO - Initial process node created - PID: 4456, Name: ThunderboltService.exe, Parent PID: 828
+2025-05-27 17:01:42,130 - INFO - Initial process node created - PID: 7528, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:42,139 - INFO - Initial process node created - PID: 9576, Name: AcroCEF.exe, Parent PID: 16628
+2025-05-27 17:01:42,172 - INFO - Initial process node created - PID: 876, Name: lsass.exe, Parent PID: 756
+2025-05-27 17:01:42,202 - INFO - Initial process node created - PID: 1388, Name: dwm.exe, Parent PID: 892
+2025-05-27 17:01:42,232 - INFO - Initial process node created - PID: 3948, Name: Dell.TechHub.exe, Parent PID: 828
+2025-05-27 17:01:42,240 - INFO - Initial process node created - PID: 16236, Name: AcroCEF.exe, Parent PID: 16628
+2025-05-27 17:01:42,270 - INFO - Initial process node created - PID: 4464, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,281 - INFO - Initial process node created - PID: 4976, Name: SearchApp.exe, Parent PID: 596
+2025-05-27 17:01:42,312 - INFO - Initial process node created - PID: 14192, Name: DDVDataCollector.exe, Parent PID: 828
+2025-05-27 17:01:42,342 - INFO - Initial process node created - PID: 1908, Name: MoUsoCoreWorker.exe, Parent PID: 596
+2025-05-27 17:01:42,351 - INFO - Initial process node created - PID: 10100, Name: powershell.exe, Parent PID: 8292
+2025-05-27 17:01:42,361 - INFO - Initial process node created - PID: 17780, Name: taskhostw.exe, Parent PID: 1732
+2025-05-27 17:01:42,390 - INFO - Initial process node created - PID: 3960, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,421 - INFO - Initial process node created - PID: 4472, Name: RstMwService.exe, Parent PID: 828
+2025-05-27 17:01:42,456 - INFO - Initial process node created - PID: 18296, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,494 - INFO - Initial process node created - PID: 892, Name: winlogon.exe, Parent PID: 748
+2025-05-27 17:01:42,523 - INFO - Initial process node created - PID: 5500, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,553 - INFO - Initial process node created - PID: 9600, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,564 - INFO - Initial process node created - PID: 11648, Name: msedgewebview2.exe, Parent PID: 11612
+2025-05-27 17:01:42,595 - INFO - Initial process node created - PID: 4484, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,627 - INFO - Initial process node created - PID: 7044, Name: Dell.TechHub.Diagnostics.SubAgent.exe, Parent PID: 3948
+2025-05-27 17:01:42,636 - INFO - Initial process node created - PID: 10628, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:42,648 - INFO - Initial process node created - PID: 13308, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:42,679 - INFO - Initial process node created - PID: 3476, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,688 - INFO - Initial process node created - PID: 16788, Name: swriter.exe, Parent PID: 8840
+2025-05-27 17:01:42,699 - INFO - Initial process node created - PID: 8604, Name: ctfmon.exe, Parent PID: 8540
+2025-05-27 17:01:42,709 - INFO - Initial process node created - PID: 10652, Name: firefox.exe, Parent PID: 604
+2025-05-27 17:01:42,740 - INFO - Initial process node created - PID: 4000, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,750 - INFO - Initial process node created - PID: 13216, Name: CodeSetup-stable-0.50.7.exe, Parent PID: 1136
+2025-05-27 17:01:42,781 - INFO - Initial process node created - PID: 2468, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,812 - INFO - Initial process node created - PID: 3496, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,841 - INFO - Initial process node created - PID: 1452, Name: IntelCpHDCPSvc.exe, Parent PID: 828
+2025-05-27 17:01:42,872 - INFO - Initial process node created - PID: 3504, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,904 - INFO - Initial process node created - PID: 4016, Name: WmiPrvSE.exe, Parent PID: 596
+2025-05-27 17:01:42,936 - INFO - Initial process node created - PID: 4532, Name: WavesSysSvc64.exe, Parent PID: 828
+2025-05-27 17:01:42,967 - INFO - Initial process node created - PID: 4024, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:42,999 - INFO - Initial process node created - PID: 13756, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:43,009 - INFO - Initial process node created - PID: 4544, Name: Cursor.exe, Parent PID: 1136
+2025-05-27 17:01:43,041 - INFO - Initial process node created - PID: 9152, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:43,053 - INFO - Initial process node created - PID: 10688, Name: RuntimeBroker.exe, Parent PID: 596
+2025-05-27 17:01:43,087 - INFO - Initial process node created - PID: 1996, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:43,119 - INFO - Initial process node created - PID: 8652, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:43,130 - INFO - Initial process node created - PID: 12748, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:43,140 - INFO - Initial process node created - PID: 6616, Name: sihost.exe, Parent PID: 1112
+2025-05-27 17:01:43,150 - INFO - Initial process node created - PID: 7640, Name: notepad.exe, Parent PID: 6464
+2025-05-27 17:01:43,186 - INFO - Initial process node created - PID: 1504, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:43,218 - INFO - Initial process node created - PID: 5088, Name: tunmgr.exe, Parent PID: 828
+2025-05-27 17:01:43,252 - INFO - Initial process node created - PID: 3044, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:43,284 - INFO - Initial process node created - PID: 3556, Name: spoolsv.exe, Parent PID: 828
+2025-05-27 17:01:43,295 - INFO - Initial process node created - PID: 18404, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:43,304 - INFO - Initial process node created - PID: 12776, Name: CodeSetup-stable-0.50.7.tmp, Parent PID: 13216
+2025-05-27 17:01:43,338 - INFO - Initial process node created - PID: 4588, Name: MsMpEng.exe, Parent PID: 828
+2025-05-27 17:01:43,374 - INFO - Initial process node created - PID: 7148, Name: BbDevMgr.exe, Parent PID: 828
+2025-05-27 17:01:43,412 - INFO - Initial process node created - PID: 3056, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:43,422 - INFO - Initial process node created - PID: 4080, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:43,434 - INFO - Initial process node created - PID: 15344, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:43,447 - INFO - Initial process node created - PID: 16880, Name: AcroCEF.exe, Parent PID: 16628
+2025-05-27 17:01:43,482 - INFO - Initial process node created - PID: 1524, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:43,517 - INFO - Initial process node created - PID: 2548, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:43,530 - INFO - Initial process node created - PID: 5108, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:01:43,563 - INFO - Initial process node created - PID: 2556, Name: svchost.exe, Parent PID: 828
+2025-05-27 17:01:44,200 - INFO - Process terminated - PID: 9836, Name: updater.exe
+2025-05-27 17:01:44,201 - INFO - Process terminated - PID: 7392, Name: updater.exe
+2025-05-27 17:02:04,584 - INFO - Process terminated - PID: 7528, Name: firefox.exe
+2025-05-27 17:02:25,301 - INFO - New process node created - PID: 16992, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:02:25,302 - INFO - New process detected - PID: 16992, Name: firefox.exe
+2025-05-27 17:02:27,995 - INFO - Process terminated - PID: 5108, Name: firefox.exe
+2025-05-27 17:03:05,318 - INFO - Process terminated - PID: 18296, Name: svchost.exe
+2025-05-27 17:03:07,102 - INFO - Process terminated - PID: 11956, Name: msedgewebview2.exe
+2025-05-27 17:03:07,103 - INFO - Process terminated - PID: 12048, Name: msedgewebview2.exe
+2025-05-27 17:03:07,103 - INFO - Process terminated - PID: 12052, Name: msedgewebview2.exe
+2025-05-27 17:03:07,104 - INFO - Process terminated - PID: 10008, Name: msedgewebview2.exe
+2025-05-27 17:03:07,817 - INFO - Process terminated - PID: 12100, Name: DuckDuckGo.exe
+2025-05-27 17:03:07,818 - INFO - Process terminated - PID: 11612, Name: msedgewebview2.exe
+2025-05-27 17:03:07,819 - INFO - Process terminated - PID: 11648, Name: msedgewebview2.exe
+2025-05-27 17:03:25,236 - INFO - Process terminated - PID: 8256, Name: firefox.exe
+2025-05-27 17:03:37,597 - INFO - Process terminated - PID: 11416, Name: RuntimeBroker.exe
+2025-05-27 17:03:57,935 - INFO - New process node created - PID: 10868, Name: ADNotificationManager.exe, Parent PID: 15560
+2025-05-27 17:03:57,936 - INFO - New process detected - PID: 10868, Name: ADNotificationManager.exe
+2025-05-27 17:04:18,782 - INFO - Process terminated - PID: 15016, Name: AcroCEF.exe
+2025-05-27 17:04:21,010 - INFO - Process terminated - PID: 6156, Name: AcroCEF.exe
+2025-05-27 17:04:21,011 - INFO - Process terminated - PID: 16028, Name: Acrobat.exe
+2025-05-27 17:04:21,012 - INFO - Process terminated - PID: 17068, Name: Acrobat.exe
+2025-05-27 17:04:21,012 - INFO - Process terminated - PID: 12016, Name: AcroCEF.exe
+2025-05-27 17:04:21,013 - INFO - Process terminated - PID: 16628, Name: AcroCEF.exe
+2025-05-27 17:04:21,013 - INFO - Process terminated - PID: 2888, Name: AcroCEF.exe
+2025-05-27 17:04:21,014 - INFO - Process terminated - PID: 4936, Name: AcroCEF.exe
+2025-05-27 17:04:21,015 - INFO - Process terminated - PID: 9576, Name: AcroCEF.exe
+2025-05-27 17:04:21,015 - INFO - Process terminated - PID: 16236, Name: AcroCEF.exe
+2025-05-27 17:04:21,016 - INFO - Process terminated - PID: 16880, Name: AcroCEF.exe
+2025-05-27 17:04:25,551 - INFO - New process node created - PID: 14388, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:04:25,552 - INFO - New process detected - PID: 14388, Name: firefox.exe
+2025-05-27 17:04:54,537 - INFO - Process terminated - PID: 5264, Name: firefox.exe
+2025-05-27 17:05:32,885 - INFO - Process terminated - PID: 7820, Name: svchost.exe
+2025-05-27 17:05:38,389 - INFO - New process node created - PID: 14264, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:05:38,390 - INFO - New process detected - PID: 14264, Name: firefox.exe
+2025-05-27 17:05:59,349 - INFO - New process node created - PID: 16368, Name: firefox.exe, Parent PID: 10652
+2025-05-27 17:05:59,350 - INFO - New process detected - PID: 16368, Name: firefox.exe
+2025-05-27 17:06:06,579 - INFO - Received escape key - shutting down
+2025-05-27 17:06:06,966 - INFO - Process terminated - PID: 15344, Name: firefox.exe
+2025-05-27 17:06:07,072 - INFO - Shutting down - Total processes monitored: 5

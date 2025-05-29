@@ -9,6 +9,9 @@ from typing import Dict, List, Tuple
 import logging
 import os
 from scipy.io import wavfile
+from OpenGL.GL import *
+from OpenGL.GLU import *
+import pygame.locals as pgl
 
 # Set up logging
 log_dir = "logs"
@@ -35,18 +38,27 @@ class ProcessNode:
         self.pid = pid
         self.name = name
         self.pos = list(pos)
-        self.target_pos = list(pos)
+        self.target_pos = list(pos)  # Only used for new processes
         self.velocity = [0, 0]
         self.creation_time = creation_time
         self.alpha = 255
         self.radius = 5
-        self.is_new = not is_initial  # Don't mark initial processes as new
-        self.time_alive = 0  # Track how long the process has been visible
-        self.color = (
-            random.randint(50, 255),
-            random.randint(50, 255),
-            random.randint(50, 255)
-        )
+        self.is_new = not is_initial
+        self.time_alive = 0
+        self.is_terminating = False
+        # Brighter colors for new processes
+        if self.is_new:
+            self.color = (
+                random.randint(180, 255) / 255.0,
+                random.randint(180, 255) / 255.0,
+                random.randint(180, 255) / 255.0
+            )
+        else:
+            self.color = (
+                random.randint(50, 150) / 255.0,
+                random.randint(50, 150) / 255.0,
+                random.randint(50, 150) / 255.0
+            )
         self.parent_pid = None
         self.cpu_percent = 0.0
         self.memory_percent = 0.0
@@ -55,14 +67,23 @@ class ProcessNode:
         self.net_io_counters = None
         self.last_bytes_sent = 0
         self.last_bytes_recv = 0
-        self.network_activity = 0.0  # Scale from 0 to 1 indicating recent activity
+        self.network_activity = 0.0
+        self.text_offset = [10, -10]
+        self.connection_endpoints = {}  # Store stable connection endpoints
         
         try:
             proc = psutil.Process(pid)
             self.parent_pid = proc.ppid()
-            self.cpu_percent = proc.cpu_percent()
+            proc.cpu_percent()
             self.memory_percent = proc.memory_percent()
             self.network_connections = proc.connections()
+            # Initialize stable connection endpoints
+            for conn in self.network_connections:
+                if conn.status == 'ESTABLISHED' and conn.raddr:
+                    key = f"{conn.raddr.ip}:{conn.raddr.port}"
+                    if key not in self.connection_endpoints:
+                        angle = random.uniform(0, 2 * math.pi)
+                        self.connection_endpoints[key] = angle
             try:
                 self.net_io_counters = proc.io_counters()
                 self.last_bytes_sent = self.net_io_counters.write_bytes
@@ -72,46 +93,67 @@ class ProcessNode:
             logger.info(f"{'Initial' if is_initial else 'New'} process node created - PID: {pid}, Name: {name}, Parent PID: {self.parent_pid}")
         except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
             logger.warning(f"Could not get process info for {pid} ({name}): {str(e)}")
-            
-    def update_stats(self):
-        """Update process statistics"""
-        try:
-            proc = psutil.Process(self.pid)
-            current_time = time.time()
-            if current_time - self.last_update >= 1.0:  # Update every second
-                self.cpu_percent = proc.cpu_percent()
-                self.memory_percent = proc.memory_percent()
-                self.network_connections = proc.connections()
-                
-                # Update network activity
-                try:
-                    new_io = proc.io_counters()
-                    if self.net_io_counters:
-                        bytes_sent_delta = new_io.write_bytes - self.last_bytes_sent
-                        bytes_recv_delta = new_io.read_bytes - self.last_bytes_recv
-                        # Calculate activity level (0-1) based on bytes transferred
-                        activity = (bytes_sent_delta + bytes_recv_delta) / (1024 * 1024)  # MB/s
-                        self.network_activity = min(1.0, activity)
-                    self.net_io_counters = new_io
-                    self.last_bytes_sent = new_io.write_bytes
-                    self.last_bytes_recv = new_io.read_bytes
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    self.network_activity *= 0.5  # Decay activity if we can't measure it
-                
-                self.last_update = current_time
-        except (psutil.NoSuchProcess, psutil.AccessDenied):
-            pass
 
 class ProcessVisualizer:
     def __init__(self):
         logger.info("Initializing ProcessVisualizer")
         pygame.init()
+        pygame.display.gl_set_attribute(pgl.GL_MULTISAMPLEBUFFERS, 1)
+        pygame.display.gl_set_attribute(pgl.GL_MULTISAMPLESAMPLES, 4)
         pygame.mixer.init(44100, -16, 2, 1024)
         
-        self.width = 1200
-        self.height = 800
-        self.screen = pygame.display.set_mode((self.width, self.height))
+        # Get display information for all monitors
+        pygame.display.init()
+        displays = pygame.display.get_desktop_sizes()
+        
+        # Use second monitor if available, otherwise use primary
+        if len(displays) > 1:
+            self.monitor_index = 1
+            monitor_x = sum(d[0] for d in displays[:1])  # X offset for second monitor
+            self.width = min(1200, displays[1][0] - 100)
+            self.height = min(800, displays[1][1] - 100)
+            os.environ['SDL_VIDEO_WINDOW_POS'] = f"{monitor_x + 50},{50}"
+        else:
+            self.monitor_index = 0
+            self.width = min(1200, displays[0][0] - 100)
+            self.height = min(800, displays[0][1] - 100)
+            os.environ['SDL_VIDEO_WINDOW_POS'] = "50,50"
+        
+        # Create window with minimum size constraints
+        self.min_width = 800
+        self.min_height = 600
+        self.screen = pygame.display.set_mode((self.width, self.height), 
+                                            pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE)
         pygame.display.set_caption("Procify - Process Visualization")
+        
+        # Window dragging state
+        self.window_drag = False
+        self.drag_offset = (0, 0)
+        self.titlebar_height = 30
+        
+        # Node spacing parameters
+        self.min_edge_length = 150
+        self.repulsion_strength = 2000
+        self.attraction_strength = 0.1
+        self.max_edge_length = 300
+        
+        # Animation parameters
+        self.animation_speed = 0.2  # Speed of smooth transitions
+        self.last_frame_time = time.time()
+        self.delta_time = 0.016  # Initial frame time
+        
+        # Initialize OpenGL
+        self.update_viewport()
+        
+        glEnable(GL_BLEND)
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+        glEnable(GL_LINE_SMOOTH)
+        glEnable(GL_POINT_SMOOTH)
+        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST)
+        
+        # Create a background surface for text
+        self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
         
         # Generate sound effects
         self.generate_sound_effects()
@@ -120,25 +162,25 @@ class ProcessVisualizer:
         self.nodes: Dict[int, ProcessNode] = {}
         self.font = pygame.font.Font(None, 24)
         self.small_font = pygame.font.Font(None, 18)
-        self.last_process_check = time.time()
-        self.process_check_interval = 0.2  # Increased refresh rate from 0.5 to 0.2 seconds
+        self.last_process_check = 0  # Start at 0 to force immediate update
+        self.process_check_interval = 0.05  # Check more frequently
+        self.process_update_index = 0  # Index for updating processes in batches
+        self.processes_per_update = 10  # Number of processes to update per frame
         self.running = True
         self.total_processes_monitored = 0
         
-        # Camera/view controls
         self.offset_x = 0
         self.offset_y = 0
         self.zoom = 1.0
         self.dragging = False
         self.last_mouse_pos = None
-        self.new_process_highlight_duration = 5.0  # Seconds to highlight new processes
+        self.new_process_highlight_duration = 5.0
         
-        # Display options
         self.show_network = True
         self.show_stats = True
-        
-        # Track initial startup
         self.initial_startup = True
+        self.movement_speed = 0.1
+        self.node_spacing = 100
         
         logger.info(f"ProcessVisualizer initialized with window size: {self.width}x{self.height}")
 
@@ -172,6 +214,18 @@ class ProcessVisualizer:
         self.start_sound.set_volume(0.3)
         self.end_sound.set_volume(0.3)
 
+    def update_viewport(self):
+        """Update OpenGL viewport after window resize or move"""
+        try:
+            glViewport(0, 0, self.width, self.height)
+            glMatrixMode(GL_PROJECTION)
+            glLoadIdentity()
+            gluOrtho2D(0, self.width, self.height, 0)
+            glMatrixMode(GL_MODELVIEW)
+            glLoadIdentity()
+        except Exception as e:
+            logger.error(f"Error updating viewport: {str(e)}")
+
     def screen_to_world(self, screen_pos):
         """Convert screen coordinates to world coordinates"""
         x = (screen_pos[0] - self.width/2) / self.zoom - self.offset_x
@@ -192,6 +246,10 @@ class ProcessVisualizer:
         return (x, y)
 
     def handle_input(self):
+        current_time = time.time()
+        self.delta_time = min(current_time - self.last_frame_time, 0.1)  # Cap at 100ms
+        self.last_frame_time = current_time
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
@@ -200,88 +258,159 @@ class ProcessVisualizer:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
                     logger.info("Received escape key - shutting down")
-                elif event.key == pygame.K_n:  # Toggle network connections
+                elif event.key == pygame.K_n:
                     self.show_network = not self.show_network
-                elif event.key == pygame.K_s:  # Toggle stats
+                elif event.key == pygame.K_s:
                     self.show_stats = not self.show_stats
             elif event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:  # Left mouse button
-                    self.dragging = True
-                    self.last_mouse_pos = event.pos
-                elif event.button == 4:  # Mouse wheel up
+                if event.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if mouse_pos[1] < self.titlebar_height:
+                        self.window_drag = True
+                        self.drag_offset = mouse_pos
+                    else:
+                        self.dragging = True
+                        self.last_mouse_pos = event.pos
+                elif event.button == 4:
                     self.zoom *= 1.1
-                elif event.button == 5:  # Mouse wheel down
+                elif event.button == 5:
                     self.zoom /= 1.1
             elif event.type == pygame.MOUSEBUTTONUP:
-                if event.button == 1:  # Left mouse button
+                if event.button == 1:
+                    self.window_drag = False
                     self.dragging = False
             elif event.type == pygame.MOUSEMOTION:
-                if self.dragging:
+                if self.window_drag:
+                    new_pos = pygame.mouse.get_pos()
+                    dx = new_pos[0] - self.drag_offset[0]
+                    dy = new_pos[1] - self.drag_offset[1]
+                    x, y = pygame.display.get_window_position()
+                    try:
+                        pygame.display.set_mode((self.width, self.height), 
+                                              pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE)
+                        os.environ['SDL_VIDEO_WINDOW_POS'] = f"{x + dx},{y + dy}"
+                        self.update_viewport()
+                    except Exception as e:
+                        logger.error(f"Error during window drag: {str(e)}")
+                    self.drag_offset = new_pos
+                elif self.dragging:
                     dx = event.pos[0] - self.last_mouse_pos[0]
                     dy = event.pos[1] - self.last_mouse_pos[1]
                     self.offset_x += dx / self.zoom
                     self.offset_y += dy / self.zoom
                     self.last_mouse_pos = event.pos
+            elif event.type == pygame.VIDEORESIZE:
+                # Enforce minimum window size
+                self.width = max(event.w, self.min_width)
+                self.height = max(event.h, self.min_height)
+                try:
+                    self.screen = pygame.display.set_mode((self.width, self.height), 
+                                                        pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE)
+                    self.update_viewport()
+                except Exception as e:
+                    logger.error(f"Error during resize: {str(e)}")
+                    # Revert to previous size if resize fails
+                    self.width = event.w
+                    self.height = event.h
+                    self.screen = pygame.display.set_mode((self.width, self.height), 
+                                                        pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE)
+                    self.update_viewport()
 
-    def update_processes(self):
-        current_time = time.time()
-        if current_time - self.last_process_check < self.process_check_interval:
+    def draw_circle(self, x, y, radius, color):
+        glColor4f(color[0], color[1], color[2], color[3] if len(color) > 3 else 1.0)
+        glBegin(GL_TRIANGLE_FAN)
+        glVertex2f(x, y)
+        segments = 32
+        for i in range(segments + 1):
+            angle = i * (2.0 * math.pi / segments)
+            glVertex2f(x + math.cos(angle) * radius,
+                      y + math.sin(angle) * radius)
+        glEnd()
+
+    def draw_line(self, start_pos, end_pos, color, width=1):
+        glLineWidth(width)
+        glColor4f(color[0], color[1], color[2], color[3] if len(color) > 3 else 1.0)
+        glBegin(GL_LINES)
+        glVertex2f(start_pos[0], start_pos[1])
+        glVertex2f(end_pos[0], end_pos[1])
+        glEnd()
+
+    def apply_layout_forces(self):
+        """Apply force-directed layout to reduce clustering"""
+        if not self.nodes:
             return
-
-        self.last_process_check = current_time
-        current_pids = set()
-
-        # Update time_alive and stats for existing processes
+            
+        forces = {pid: [0, 0] for pid in self.nodes}
+        
+        # Apply repulsion between all nodes
+        for pid1, node1 in self.nodes.items():
+            for pid2, node2 in self.nodes.items():
+                if pid1 != pid2:
+                    dx = node1.pos[0] - node2.pos[0]
+                    dy = node1.pos[1] - node2.pos[1]
+                    distance = math.sqrt(dx*dx + dy*dy)
+                    if distance < 0.1:
+                        distance = 0.1
+                    
+                    force = self.repulsion_strength / (distance * distance)
+                    forces[pid1][0] += force * dx / distance
+                    forces[pid1][1] += force * dy / distance
+        
+        # Apply attraction for connected nodes
         for node in self.nodes.values():
-            node.time_alive += self.process_check_interval
-            if node.time_alive >= self.new_process_highlight_duration:
-                node.is_new = False
-            node.update_stats()
-
-        # Check for new processes
-        for proc in psutil.process_iter(['pid', 'name', 'create_time']):
-            try:
-                pid = proc.info['pid']
-                current_pids.add(pid)
+            if node.parent_pid in self.nodes:
+                parent = self.nodes[node.parent_pid]
+                dx = parent.pos[0] - node.pos[0]
+                dy = parent.pos[1] - node.pos[1]
+                distance = math.sqrt(dx*dx + dy*dy)
                 
-                if pid not in self.nodes:
-                    name = proc.info['name']
-                    pos = self.get_spawn_position()
-                    # Mark as initial process if we're just starting up
-                    self.nodes[pid] = ProcessNode(pid, name, pos, current_time, is_initial=self.initial_startup)
-                    self.total_processes_monitored += 1
-                    # Only play sound for new processes after initial startup
-                    if not self.initial_startup:
-                        logger.info(f"New process detected - PID: {pid}, Name: {name}")
-                        self.start_sound.play()
-
-            except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-                logger.debug(f"Access error while monitoring process: {str(e)}")
-                continue
-
-        # Clear initial startup flag after first process check
-        self.initial_startup = False
-
-    def update_node_positions(self):
-        for node in self.nodes.values():
-            # Only update positions for new or fading nodes
-            if node.is_new or node.alpha < 255:
-                dx = node.target_pos[0] - node.pos[0]
-                dy = node.target_pos[1] - node.pos[1]
+                if distance > self.min_edge_length:
+                    force = self.attraction_strength * (distance - self.min_edge_length)
+                    forces[node.pid][0] += force * dx / distance
+                    forces[node.pid][1] += force * dy / distance
+        
+        # Apply forces smoothly using delta time
+        for pid, node in self.nodes.items():
+            if not node.is_new:
+                force_x = forces[pid][0]
+                force_y = forces[pid][1]
                 
-                node.velocity[0] = dx * 0.1
-                node.velocity[1] = dy * 0.1
+                # Limit maximum force
+                force_magnitude = math.sqrt(force_x*force_x + force_y*force_y)
+                if force_magnitude > 5:
+                    force_x *= 5/force_magnitude
+                    force_y *= 5/force_magnitude
                 
-                node.pos[0] += node.velocity[0]
-                node.pos[1] += node.velocity[1]
+                # Apply smooth movement using delta time
+                node.pos[0] += force_x * self.animation_speed * self.delta_time * 60
+                node.pos[1] += force_y * self.animation_speed * self.delta_time * 60
 
     def draw(self):
-        self.screen.fill((0, 0, 0))
+        # Apply layout forces before drawing
+        self.apply_layout_forces()
+        
+        # Clear both OpenGL and text surface
+        glClearColor(0.0, 0.0, 0.0, 1.0)
+        glClear(GL_COLOR_BUFFER_BIT)
+        self.text_surface.fill((0, 0, 0, 0))
+        
+        # Draw title bar
+        glColor4f(0.2, 0.2, 0.2, 1.0)
+        glBegin(GL_QUADS)
+        glVertex2f(0, 0)
+        glVertex2f(self.width, 0)
+        glVertex2f(self.width, self.titlebar_height)
+        glVertex2f(0, self.titlebar_height)
+        glEnd()
+        
+        title_text = self.font.render("Procify - Process Visualization (Drag to move)", True, (200, 200, 200))
+        self.text_surface.blit(title_text, (10, 5))
 
         # First, identify processes that should be visible
         visible_processes = set()
         for node in self.nodes.values():
             if (node.is_new or 
+                node.is_terminating or
                 node.alpha < 255 or 
                 any(conn.status == 'ESTABLISHED' for conn in node.network_connections)):
                 visible_processes.add(node.pid)
@@ -291,82 +420,43 @@ class ProcessVisualizer:
 
         # Draw network connections if enabled
         if self.show_network:
-            # First pass: collect all connection endpoints
-            connection_map = {}
             for node in self.nodes.values():
-                for conn in node.network_connections:
-                    if conn.status == 'ESTABLISHED':
-                        if conn.laddr and conn.raddr:
-                            key = (conn.laddr.port, conn.raddr.port)
-                            connection_map[key] = (node, conn)
-
-            # Second pass: draw connections between processes
-            for (lport, rport), (node, conn) in connection_map.items():
-                # Try to find the other end of the connection
-                for other_node in self.nodes.values():
-                    for other_conn in other_node.network_connections:
-                        if (other_conn.status == 'ESTABLISHED' and 
-                            other_conn.laddr and other_conn.raddr and
-                            other_conn.laddr.port == rport and
-                            other_conn.raddr.port == lport):
-                            # Found a matching connection
-                            start_pos = self.world_to_screen(node.pos)
-                            end_pos = self.world_to_screen(other_node.pos)
+                if node.pid in visible_processes:
+                    screen_pos = self.world_to_screen(node.pos)
+                    
+                    # Draw established connections using stored endpoints
+                    for conn in node.network_connections:
+                        if conn.status == 'ESTABLISHED' and conn.raddr:
+                            key = f"{conn.raddr.ip}:{conn.raddr.port}"
                             
-                            # Calculate connection activity (max of both ends)
-                            activity = max(node.network_activity, other_node.network_activity)
+                            # Create stable endpoint if it doesn't exist
+                            if key not in node.connection_endpoints:
+                                angle = random.uniform(0, 2 * math.pi)
+                                node.connection_endpoints[key] = angle
                             
-                            # Pulse color based on activity
-                            base_color = (0, 150, 255)
-                            pulse = math.sin(time.time() * 10) * 0.5 + 0.5  # Oscillate between 0 and 1
-                            color = tuple(int(c * (1 + activity * pulse)) for c in base_color)
-                            color = (min(255, color[0]), min(255, color[1]), min(255, color[2]), node.alpha)
+                            # Use stored angle for stable endpoint position
+                            angle = node.connection_endpoints[key]
+                            end_pos = (
+                                screen_pos[0] + math.cos(angle) * 50,
+                                screen_pos[1] + math.sin(angle) * 50
+                            )
                             
-                            # Draw connection line with varying thickness based on activity
-                            thickness = 1 + int(activity * 3)
-                            pygame.draw.line(self.screen, color, start_pos, end_pos, thickness)
-                            
-                            # Draw connection info if stats are enabled
-                            if self.show_stats and activity > 0:
-                                mid_x = (start_pos[0] + end_pos[0]) / 2
-                                mid_y = (start_pos[1] + end_pos[1]) / 2
-                                activity_text = f"{activity * 100:.1f}%"
-                                text = self.small_font.render(activity_text, True, color)
-                                self.screen.blit(text, (mid_x, mid_y))
-
-            # Draw unmatched connections as short lines
-            for node in self.nodes.values():
-                unmatched_conns = [c for c in node.network_connections 
-                                 if c.status == 'ESTABLISHED' and 
-                                 not any(n != node and any(oc.status == 'ESTABLISHED' and 
-                                                         oc.laddr and c.raddr and
-                                                         oc.laddr.port == c.raddr.port 
-                                                         for oc in n.network_connections)
-                                       for n in self.nodes.values())]
-                
-                if unmatched_conns:
-                    start_pos = self.world_to_screen(node.pos)
-                    for conn in unmatched_conns:
-                        if conn.raddr:
-                            # Draw a short line for external connections
-                            angle = random.uniform(0, 2 * math.pi)
-                            end_pos = (start_pos[0] + math.cos(angle) * 50,
-                                     start_pos[1] + math.sin(angle) * 50)
-                            
-                            # Pulse color based on activity
+                            # Calculate connection activity
                             activity = node.network_activity
+                            
+                            # Pulse color based on activity
                             base_color = (0, 150, 255)
                             pulse = math.sin(time.time() * 10) * 0.5 + 0.5
                             color = tuple(int(c * (1 + activity * pulse)) for c in base_color)
-                            color = (min(255, color[0]), min(255, color[1]), min(255, color[2]), node.alpha)
+                            color = (min(255, color[0])/255.0, min(255, color[1])/255.0, min(255, color[2])/255.0, node.alpha/255.0)
                             
                             thickness = 1 + int(activity * 3)
-                            pygame.draw.line(self.screen, color, start_pos, end_pos, thickness)
+                            self.draw_line(screen_pos, end_pos, color, thickness)
                             
                             if self.show_stats:
                                 conn_text = f"{conn.raddr.ip}:{conn.raddr.port}"
-                                text = self.small_font.render(conn_text, True, color)
-                                self.screen.blit(text, (end_pos[0] + 5, end_pos[1] - 5))
+                                text = self.small_font.render(conn_text, True, tuple(int(c*255) for c in color[:3]))
+                                self.text_surface.blit(text, (end_pos[0] + 5, end_pos[1] - 5))
 
         # Draw process connections (parent-child relationships)
         for node in self.nodes.values():
@@ -376,16 +466,17 @@ class ProcessVisualizer:
                 color = (*node.color[:3], alpha)
                 start_pos = self.world_to_screen(node.pos)
                 end_pos = self.world_to_screen(parent.pos)
-                pygame.draw.line(self.screen, color, start_pos, end_pos, 1)
+                self.draw_line(start_pos, end_pos, color, 1)
 
-        # Draw nodes
+        # Draw nodes and collect text boxes
         new_processes_count = 0
         terminating_processes_count = 0
+        text_boxes = []
         
         for node in self.nodes.values():
             if node.is_new:
                 new_processes_count += 1
-            if node.alpha < 255:
+            if node.is_terminating:
                 terminating_processes_count += 1
             
             # Only draw visible processes
@@ -396,9 +487,7 @@ class ProcessVisualizer:
                 if node.is_new:
                     glow_radius = node.radius + 5 + math.sin(time.time() * 5) * 2
                     glow_color = (255, 255, 100, node.alpha)
-                    pygame.draw.circle(self.screen, glow_color,
-                                     (int(screen_pos[0]), int(screen_pos[1])),
-                                     int(glow_radius * self.zoom))
+                    self.draw_circle(screen_pos[0], screen_pos[1], glow_radius, glow_color)
 
                 # Scale node radius based on CPU and memory usage
                 if self.show_stats and (node.cpu_percent > 0 or node.memory_percent > 0):
@@ -409,42 +498,195 @@ class ProcessVisualizer:
 
                 # Draw node
                 color = (*node.color[:3], node.alpha)
-                pygame.draw.circle(self.screen, color,
-                                 (int(screen_pos[0]), int(screen_pos[1])),
-                                 int(scaled_radius * self.zoom))
+                self.draw_circle(screen_pos[0], screen_pos[1], scaled_radius, color)
                 
-                # Draw process info
+                # Collect text box information
                 if node.alpha > 128:
-                    text_color = (255, 255, 100) if node.is_new else (200, 200, 200)
-                    name_text = self.font.render(f"{node.name} (PID: {node.pid})", True, text_color)
-                    self.screen.blit(name_text, (screen_pos[0] + 10 * self.zoom, screen_pos[1] - 10 * self.zoom))
+                    # Calculate text position
+                    text_pos = (screen_pos[0] + node.text_offset[0] * self.zoom, 
+                              screen_pos[1] + node.text_offset[1] * self.zoom)
+                    
+                    # Get text dimensions
+                    name_text = f"{node.name} (PID: {node.pid})"
+                    name_width, name_height = self.font.size(name_text)
                     
                     if self.show_stats:
                         stats_text = f"CPU: {node.cpu_percent:.1f}% MEM: {node.memory_percent:.1f}%"
-                        stats_surface = self.small_font.render(stats_text, True, (150, 150, 150))
-                        self.screen.blit(stats_surface, (screen_pos[0] + 10 * self.zoom, screen_pos[1] + 5 * self.zoom))
+                        stats_width = self.small_font.size(stats_text)[0]
+                        width = max(name_width, stats_width)
+                        height = name_height + self.small_font.get_height()
+                    else:
+                        width = name_width
+                        height = name_height
+                    
+                    text_boxes.append({
+                        'node': node,
+                        'pos': text_pos,
+                        'width': width,
+                        'height': height,
+                        'screen_pos': screen_pos
+                    })
+
+        # Adjust text positions to prevent overlap
+        for i, box1 in enumerate(text_boxes):
+            for box2 in text_boxes[i+1:]:
+                # Check for overlap
+                if (box1['pos'][0] < box2['pos'][0] + box2['width'] and
+                    box1['pos'][0] + box1['width'] > box2['pos'][0] and
+                    box1['pos'][1] < box2['pos'][1] + box2['height'] and
+                    box1['pos'][1] + box1['height'] > box2['pos'][1]):
+                    
+                    # Adjust text offsets to prevent overlap
+                    node1, node2 = box1['node'], box2['node']
+                    center1 = box1['screen_pos']
+                    center2 = box2['screen_pos']
+                    
+                    # Place text on opposite sides of nodes
+                    angle = math.atan2(center2[1] - center1[1], center2[0] - center1[0])
+                    
+                    # Node 1 text placement
+                    node1.text_offset = [
+                        -math.cos(angle) * 50,
+                        -math.sin(angle) * 50
+                    ]
+                    
+                    # Node 2 text placement
+                    node2.text_offset = [
+                        math.cos(angle) * 50,
+                        math.sin(angle) * 50
+                    ]
+
+        # Draw the text with adjusted positions
+        for box in text_boxes:
+            node = box['node']
+            screen_pos = box['screen_pos']
+            text_pos = (screen_pos[0] + node.text_offset[0] * self.zoom,
+                       screen_pos[1] + node.text_offset[1] * self.zoom)
+            
+            text_color = (255, 255, 100) if node.is_new else (200, 200, 200)
+            name_text = self.font.render(f"{node.name} (PID: {node.pid})", True, text_color)
+            self.text_surface.blit(name_text, text_pos)
+            
+            if self.show_stats:
+                stats_text = f"CPU: {node.cpu_percent:.1f}% MEM: {node.memory_percent:.1f}%"
+                stats_surface = self.small_font.render(stats_text, True, (150, 150, 150))
+                self.text_surface.blit(stats_surface, (text_pos[0], text_pos[1] + self.font.get_height()))
 
         # Draw stats
         stats_text = f"New: {new_processes_count} | Terminating: {terminating_processes_count} | Zoom: {self.zoom:.1f}x"
         stats_surface = self.font.render(stats_text, True, (200, 200, 200))
-        self.screen.blit(stats_surface, (10, 10))
+        self.text_surface.blit(stats_surface, (10, 10))
 
         # Draw controls help
         help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | ESC = Exit"
         help_surface = self.font.render(help_text, True, (150, 150, 150))
-        self.screen.blit(help_surface, (10, self.height - 30))
+        self.text_surface.blit(help_surface, (10, self.height - 30))
 
+        # After all OpenGL drawing, render the text surface
+        text_data = pygame.image.tostring(self.text_surface, 'RGBA', True)
+        glDrawPixels(self.width, self.height, GL_RGBA, GL_UNSIGNED_BYTE, text_data)
+        
         pygame.display.flip()
+
+    def update_processes(self):
+        current_time = time.time()
+        
+        # Always check for new/terminated processes
+        if current_time - self.last_process_check >= self.process_check_interval:
+            self.last_process_check = current_time
+            current_pids = set(p.pid for p in psutil.process_iter())
+            
+            # Quick check for new and terminated processes
+            for pid in current_pids:
+                if pid not in self.nodes:
+                    try:
+                        proc = psutil.Process(pid)
+                        name = proc.name()
+                        pos = self.get_spawn_position()
+                        self.nodes[pid] = ProcessNode(pid, name, pos, current_time, is_initial=self.initial_startup)
+                        self.total_processes_monitored += 1
+                        if not self.initial_startup:
+                            logger.info(f"New process detected - PID: {pid}, Name: {name}")
+                            self.start_sound.play()
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        continue
+
+            # Handle terminated processes
+            for pid in list(self.nodes.keys()):
+                if pid not in current_pids:
+                    node = self.nodes[pid]
+                    if node.alpha == 255:
+                        logger.info(f"Process terminated - PID: {pid}, Name: {node.name}")
+                        self.end_sound.play()
+                        node.is_terminating = True
+                        # Change color to red when terminating
+                        node.color = (1.0, 0.0, 0.0)
+                    node.alpha = max(0, node.alpha - 10)
+                    if node.alpha <= 0:
+                        del self.nodes[pid]
+
+        # Update a batch of processes every frame
+        if self.nodes:
+            pids = list(self.nodes.keys())
+            start_idx = self.process_update_index
+            end_idx = min(start_idx + self.processes_per_update, len(pids))
+            
+            for pid in pids[start_idx:end_idx]:
+                node = self.nodes[pid]
+                try:
+                    proc = psutil.Process(pid)
+                    node.cpu_percent = proc.cpu_percent()
+                    node.memory_percent = proc.memory_percent()
+                    node.network_connections = proc.connections()
+                    
+                    try:
+                        new_io = proc.io_counters()
+                        if node.net_io_counters:
+                            bytes_sent_delta = new_io.write_bytes - node.last_bytes_sent
+                            bytes_recv_delta = new_io.read_bytes - node.last_bytes_recv
+                            activity = (bytes_sent_delta + bytes_recv_delta) / (1024 * 1024)
+                            node.network_activity = min(1.0, activity)
+                        node.net_io_counters = new_io
+                        node.last_bytes_sent = new_io.write_bytes
+                        node.last_bytes_recv = new_io.read_bytes
+                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        node.network_activity *= 0.5
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    pass
+
+                node.time_alive += self.process_check_interval
+                if node.time_alive >= self.new_process_highlight_duration:
+                    node.is_new = False
+
+            # Update index for next frame
+            self.process_update_index = end_idx if end_idx < len(pids) else 0
+
+        self.initial_startup = False
 
     def run(self):
         logger.info("Starting process visualization")
         try:
+            # Do initial process population quickly
+            current_pids = set(p.pid for p in psutil.process_iter())
+            for pid in current_pids:
+                try:
+                    proc = psutil.Process(pid)
+                    name = proc.name()
+                    pos = self.get_spawn_position()
+                    self.nodes[pid] = ProcessNode(pid, name, pos, time.time(), is_initial=True)
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
+
+            self.last_frame_time = time.time()
             while self.running:
-                self.handle_input()
-                self.update_processes()
-                self.update_node_positions()
-                self.draw()
-                self.clock.tick(60)
+                try:
+                    self.handle_input()
+                    self.update_processes()
+                    self.draw()
+                    self.clock.tick(60)  # Cap at 60 FPS
+                except Exception as e:
+                    logger.error(f"Error in main loop: {str(e)}")
+                    continue
 
         except Exception as e:
             logger.error(f"Error during visualization: {str(e)}", exc_info=True)
