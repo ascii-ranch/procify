@@ -414,3 +414,24 @@
 2025-05-29 19:22:29,286 - INFO - Process terminated - PID: 5568, Name: firefox.exe
 2025-05-29 19:22:42,998 - INFO - New process node created - PID: 15680, Name: FileCoAuth.exe, Parent PID: 596
 2025-05-29 19:22:43,000 - INFO - New process detected - PID: 15680, Name: FileCoAuth.exe
+2025-05-29 19:22:49,292 - INFO - Process terminated - PID: 15680, Name: FileCoAuth.exe
+2025-05-29 19:22:51,320 - INFO - New process node created - PID: 12984, Name: firefox.exe, Parent PID: 10652
+2025-05-29 19:22:51,322 - INFO - New process detected - PID: 12984, Name: firefox.exe
+2025-05-29 19:22:53,307 - INFO - New process node created - PID: 11052, Name: firefox.exe, Parent PID: 10652
+2025-05-29 19:22:53,308 - INFO - New process detected - PID: 11052, Name: firefox.exe
+2025-05-29 19:23:23,584 - INFO - Process terminated - PID: 5056, Name: firefox.exe
+2025-05-29 19:23:51,756 - INFO - Process terminated - PID: 18256, Name: firefox.exe
+2025-05-29 19:23:55,810 - INFO - Process terminated - PID: 2800, Name: powershell.exe
+2025-05-29 19:23:55,811 - INFO - Process terminated - PID: 12160, Name: conhost.exe
+2025-05-29 19:25:22,767 - INFO - New process node created - PID: 18276, Name: firefox.exe, Parent PID: 10652
+2025-05-29 19:25:22,769 - INFO - New process detected - PID: 18276, Name: firefox.exe
+2025-05-29 19:26:06,780 - INFO - Process terminated - PID: 17120, Name: firefox.exe
+2025-05-29 19:26:12,866 - INFO - New process node created - PID: 12464, Name: firefox.exe, Parent PID: 10652
+2025-05-29 19:26:12,867 - INFO - New process detected - PID: 12464, Name: firefox.exe
+2025-05-29 19:26:40,896 - INFO - Process terminated - PID: 12984, Name: firefox.exe
+2025-05-29 19:27:23,714 - INFO - New process node created - PID: 2244, Name: firefox.exe, Parent PID: 10652
+2025-05-29 19:27:23,716 - INFO - New process detected - PID: 2244, Name: firefox.exe
+2025-05-29 19:27:54,650 - INFO - New process node created - PID: 15872, Name: firefox.exe, Parent PID: 10652
+2025-05-29 19:27:54,652 - INFO - New process detected - PID: 15872, Name: firefox.exe
+2025-05-29 19:28:10,296 - INFO - Received quit signal
+2025-05-29 19:28:10,415 - INFO - Shutting down - Total processes monitored: 67

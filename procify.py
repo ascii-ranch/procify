@@ -117,6 +117,10 @@ class ProcessVisualizer:
             pygame.display.init()
             displays = pygame.display.get_desktop_sizes()
             
+            # Minimum window dimensions
+            self.min_width = 800
+            self.min_height = 600
+            
             # Use second monitor if available
             if len(displays) > 1:
                 self.monitor_index = 1
@@ -176,6 +180,7 @@ class ProcessVisualizer:
             self.running = True
             self.show_network = True
             self.show_stats = True
+            self.show_bar_graph = False  # Bar graph toggle
             self.initial_startup = True
             self.total_processes_monitored = 0
             
@@ -184,6 +189,12 @@ class ProcessVisualizer:
             self.zoom = 1.0
             self.dragging = False
             self.last_mouse_pos = None
+            
+            # IP frequency tracking
+            self.ip_frequencies = {}
+            self.ip_bar_width = 200  # Width of the bar graph area
+            self.ip_bar_margin = 5  # Margin between bars
+            self.max_ip_bars = 20  # Maximum number of IPs to show in the bar graph
             
         except Exception as e:
             logger.error(f"Failed to initialize ProcessVisualizer: {str(e)}")
@@ -268,6 +279,9 @@ class ProcessVisualizer:
                     self.show_network = not self.show_network
                 elif event.key == pygame.K_s:
                     self.show_stats = not self.show_stats
+                elif event.key == pygame.K_b:  # Toggle bar graph with 'B' key
+                    self.show_bar_graph = not self.show_bar_graph
+                    logger.info(f"Bar graph {'shown' if self.show_bar_graph else 'hidden'}")
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
@@ -312,6 +326,7 @@ class ProcessVisualizer:
                 try:
                     self.screen = pygame.display.set_mode((self.width, self.height), 
                                                         pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE)
+                    self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
                     self.update_viewport()
                 except Exception as e:
                     logger.error(f"Error during resize: {str(e)}")
@@ -320,6 +335,7 @@ class ProcessVisualizer:
                     self.height = event.h
                     self.screen = pygame.display.set_mode((self.width, self.height), 
                                                         pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE)
+                    self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
                     self.update_viewport()
 
     def draw_circle(self, x, y, radius, color):
@@ -446,6 +462,9 @@ class ProcessVisualizer:
             try:
                 current_pids = set(p.pid for p in psutil.process_iter(['pid']))
                 
+                # Reset IP frequencies each update
+                self.ip_frequencies.clear()
+                
                 # Handle new processes
                 for pid in current_pids:
                     if pid not in self.nodes:
@@ -475,7 +494,7 @@ class ProcessVisualizer:
                         if node.alpha <= 0:
                             del self.nodes[pid]
 
-                # Update process info
+                # Update process info and collect IP frequencies
                 for pid, node in self.nodes.items():
                     try:
                         proc = psutil.Process(pid)
@@ -483,6 +502,12 @@ class ProcessVisualizer:
                             node.cpu_percent = proc.cpu_percent()
                             node.memory_percent = proc.memory_percent()
                             node.network_connections = proc.connections()
+                            
+                            # Update IP frequencies
+                            for conn in node.network_connections:
+                                if conn.status == 'ESTABLISHED' and conn.raddr:
+                                    ip = conn.raddr.ip
+                                    self.ip_frequencies[ip] = self.ip_frequencies.get(ip, 0) + 1
                             
                             try:
                                 new_io = proc.io_counters()
@@ -508,6 +533,49 @@ class ProcessVisualizer:
                 logger.error(f"Error updating processes: {str(e)}")
             
             self.initial_startup = False
+
+    def draw_bar_graph(self):
+        """Draw bar graph of IP frequencies on the left side"""
+        if not self.ip_frequencies:
+            return
+            
+        # Sort IPs by frequency
+        sorted_ips = sorted(self.ip_frequencies.items(), key=lambda x: x[1], reverse=True)[:self.max_ip_bars]
+        max_freq = max(freq for _, freq in sorted_ips)
+        
+        # Calculate bar dimensions
+        bar_height = 20
+        total_height = (bar_height + self.ip_bar_margin) * len(sorted_ips)
+        start_y = (self.height - total_height) // 2
+        
+        # Draw background
+        glColor4f(0.1, 0.1, 0.1, 0.8)
+        glBegin(GL_QUADS)
+        glVertex2f(0, start_y - self.ip_bar_margin)
+        glVertex2f(self.ip_bar_width + 150, start_y - self.ip_bar_margin)  # Made wider for IP text
+        glVertex2f(self.ip_bar_width + 150, start_y + total_height + self.ip_bar_margin)
+        glVertex2f(0, start_y + total_height + self.ip_bar_margin)
+        glEnd()
+        
+        # Draw bars and IP text
+        for i, (ip, freq) in enumerate(sorted_ips):
+            y = start_y + i * (bar_height + self.ip_bar_margin)
+            width = (freq / max_freq) * self.ip_bar_width
+            
+            # Draw bar
+            glColor4f(0.2, 0.6, 1.0, 0.8)
+            glBegin(GL_QUADS)
+            glVertex2f(10, y)
+            glVertex2f(10 + width, y)
+            glVertex2f(10 + width, y + bar_height)
+            glVertex2f(10, y + bar_height)
+            glEnd()
+            
+            # Draw frequency number and IP
+            freq_text = self.small_font.render(str(freq), True, (200, 200, 200))
+            ip_text = self.small_font.render(ip, True, (150, 150, 150))
+            self.text_surface.blit(freq_text, (15 + width, y + 2))
+            self.text_surface.blit(ip_text, (self.ip_bar_width + 20, y + 2))  # IP after the bar
 
     def draw(self):
         try:
@@ -560,18 +628,6 @@ class ProcessVisualizer:
                             current_pid = self.nodes[current_pid].parent_pid
                             visible_processes.add(current_pid)
 
-            # Draw process connections (parent-child relationships)
-            logger.debug("Drawing parent-child relationships")
-            for node in self.nodes.values():
-                if node.pid in visible_processes and node.parent_pid in self.nodes:
-                    parent = self.nodes[node.parent_pid]
-                    start_pos = self.world_to_screen(node.pos)
-                    end_pos = self.world_to_screen(parent.pos)
-                    alpha = min(node.alpha, parent.alpha) / 255.0
-                    color = (*parent.color[:3], alpha)
-                    self.draw_line(start_pos, end_pos, color, 2)
-                    logger.debug(f"Drew edge from PID {node.pid} to parent PID {node.parent_pid}")
-
             # Draw network connections
             if self.show_network:
                 logger.debug("Drawing network connections")
@@ -616,6 +672,10 @@ class ProcessVisualizer:
                     color = (*node.color[:3], node.alpha / 255.0)
                     self.draw_circle(screen_pos[0], screen_pos[1], node.radius, color)
 
+            # Draw IP frequency bar graph if enabled
+            if self.show_network and self.show_bar_graph:
+                self.draw_bar_graph()
+
             # Now draw all text after OpenGL rendering
             glDisable(GL_DEPTH_TEST)
             
@@ -648,20 +708,6 @@ class ProcessVisualizer:
                             stats_surface = self.small_font.render(stats_text, True, (150, 150, 150))
                             stats_x = int(screen_pos[0] - stats_surface.get_width() // 2)
                             self.text_surface.blit(stats_surface, (stats_x, text_y + 20))
-                            
-                        # Draw connection info
-                        if self.show_network:
-                            for conn in node.network_connections:
-                                if conn.status == 'ESTABLISHED' and conn.raddr:
-                                    key = f"{conn.raddr.ip}:{conn.raddr.port}"
-                                    angle = node.connection_endpoints[key]
-                                    end_pos = (
-                                        screen_pos[0] + math.cos(angle) * 50,
-                                        screen_pos[1] + math.sin(angle) * 50
-                                    )
-                                    conn_text = f"{conn.raddr.ip}:{conn.raddr.port}"
-                                    text = self.small_font.render(conn_text, True, (100, 200, 255))
-                                    self.text_surface.blit(text, (end_pos[0] + 5, end_pos[1] - 5))
                                     
                     except Exception as e:
                         logger.error(f"Error rendering process text: {str(e)}")
@@ -672,7 +718,7 @@ class ProcessVisualizer:
             self.text_surface.blit(stats_surface, (10, 10))
 
             # Draw controls help
-            help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | ESC = Exit"
+            help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | ESC = Exit"
             help_surface = self.font.render(help_text, True, (150, 150, 150))
             self.text_surface.blit(help_surface, (10, self.height - 30))
 
