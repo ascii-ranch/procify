@@ -97,92 +97,114 @@ class ProcessNode:
 class ProcessVisualizer:
     def __init__(self):
         logger.info("Initializing ProcessVisualizer")
-        pygame.init()
-        pygame.display.gl_set_attribute(pgl.GL_MULTISAMPLEBUFFERS, 1)
-        pygame.display.gl_set_attribute(pgl.GL_MULTISAMPLESAMPLES, 4)
-        pygame.mixer.init(44100, -16, 2, 1024)
-        
-        # Get display information for all monitors
-        pygame.display.init()
-        displays = pygame.display.get_desktop_sizes()
-        
-        # Use second monitor if available, otherwise use primary
-        if len(displays) > 1:
-            self.monitor_index = 1
-            monitor_x = sum(d[0] for d in displays[:1])  # X offset for second monitor
-            self.width = min(1200, displays[1][0] - 100)
-            self.height = min(800, displays[1][1] - 100)
-            os.environ['SDL_VIDEO_WINDOW_POS'] = f"{monitor_x + 50},{50}"
-        else:
-            self.monitor_index = 0
-            self.width = min(1200, displays[0][0] - 100)
-            self.height = min(800, displays[0][1] - 100)
-            os.environ['SDL_VIDEO_WINDOW_POS'] = "50,50"
-        
-        # Create window with minimum size constraints
-        self.min_width = 800
-        self.min_height = 600
-        self.screen = pygame.display.set_mode((self.width, self.height), 
-                                            pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE)
-        pygame.display.set_caption("Procify - Process Visualization")
-        
-        # Window dragging state
-        self.window_drag = False
-        self.drag_offset = (0, 0)
-        self.titlebar_height = 30
-        
-        # Node spacing parameters
-        self.min_edge_length = 150
-        self.repulsion_strength = 2000
-        self.attraction_strength = 0.1
-        self.max_edge_length = 300
-        
-        # Animation parameters
-        self.animation_speed = 0.2  # Speed of smooth transitions
-        self.last_frame_time = time.time()
-        self.delta_time = 0.016  # Initial frame time
-        
-        # Initialize OpenGL
-        self.update_viewport()
-        
-        glEnable(GL_BLEND)
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
-        glEnable(GL_LINE_SMOOTH)
-        glEnable(GL_POINT_SMOOTH)
-        glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
-        glHint(GL_POINT_SMOOTH_HINT, GL_NICEST)
-        
-        # Create a background surface for text
-        self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-        
-        # Generate sound effects
-        self.generate_sound_effects()
-        
-        self.clock = pygame.time.Clock()
-        self.nodes: Dict[int, ProcessNode] = {}
-        self.font = pygame.font.Font(None, 24)
-        self.small_font = pygame.font.Font(None, 18)
-        self.last_process_check = 0  # Start at 0 to force immediate update
-        self.process_check_interval = 0.05  # Check more frequently
-        self.process_update_index = 0  # Index for updating processes in batches
-        self.processes_per_update = 10  # Number of processes to update per frame
-        self.running = True
-        self.total_processes_monitored = 0
-        
-        self.offset_x = 0
-        self.offset_y = 0
-        self.zoom = 1.0
-        self.dragging = False
-        self.last_mouse_pos = None
-        self.new_process_highlight_duration = 5.0
-        
-        self.show_network = True
-        self.show_stats = True
-        self.initial_startup = True
-        self.movement_speed = 0.1
-        self.node_spacing = 100
-        
-        logger.info(f"ProcessVisualizer initialized with window size: {self.width}x{self.height}")
+        try:
+            pygame.init()
+            if not pygame.display.get_init():
+                raise RuntimeError("Could not initialize pygame display")
+                
+            # Initialize OpenGL attributes before creating the window
+            pygame.display.gl_set_attribute(pgl.GL_MULTISAMPLEBUFFERS, 1)
+            pygame.display.gl_set_attribute(pgl.GL_MULTISAMPLESAMPLES, 4)
+            pygame.display.gl_set_attribute(pgl.GL_DOUBLEBUFFER, 1)
+            pygame.display.gl_set_attribute(pgl.GL_DEPTH_SIZE, 24)
+            
+            try:
+                pygame.mixer.init(44100, -16, 2, 1024)
+            except pygame.error:
+                logger.warning("Could not initialize sound mixer. Sound effects will be disabled.")
+            
+            # Get display information for all monitors
+            pygame.display.init()
+            displays = pygame.display.get_desktop_sizes()
+            
+            # Use second monitor if available, otherwise use primary
+            if len(displays) > 1:
+                self.monitor_index = 1
+                monitor_x = sum(d[0] for d in displays[:1])  # X offset for second monitor
+                self.width = min(1200, displays[1][0] - 100)
+                self.height = min(800, displays[1][1] - 100)
+                os.environ['SDL_VIDEO_WINDOW_POS'] = f"{monitor_x + 50},{50}"
+            else:
+                self.monitor_index = 0
+                self.width = min(1200, displays[0][0] - 100)
+                self.height = min(800, displays[0][1] - 100)
+                os.environ['SDL_VIDEO_WINDOW_POS'] = "50,50"
+            
+            # Create window with minimum size constraints
+            self.min_width = 800
+            self.min_height = 600
+            
+            try:
+                self.screen = pygame.display.set_mode(
+                    (self.width, self.height),
+                    pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE
+                )
+            except pygame.error as e:
+                raise RuntimeError(f"Could not create OpenGL window: {str(e)}")
+            
+            pygame.display.set_caption("Procify - Process Visualization")
+            
+            # Initialize OpenGL
+            try:
+                self.update_viewport()
+                glEnable(GL_BLEND)
+                glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+                glEnable(GL_LINE_SMOOTH)
+                glEnable(GL_POINT_SMOOTH)
+                glHint(GL_LINE_SMOOTH_HINT, GL_NICEST)
+                glHint(GL_POINT_SMOOTH_HINT, GL_NICEST)
+            except Exception as e:
+                raise RuntimeError(f"Could not initialize OpenGL: {str(e)}")
+            
+            # Initialize other attributes
+            self.window_drag = False
+            self.drag_offset = (0, 0)
+            self.titlebar_height = 30
+            self.min_edge_length = 150
+            self.repulsion_strength = 2000
+            self.attraction_strength = 0.1
+            self.max_edge_length = 300
+            self.animation_speed = 0.2
+            self.last_frame_time = time.time()
+            self.delta_time = 0.016
+            
+            # Create text surface
+            try:
+                self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+                self.font = pygame.font.Font(None, 24)
+                self.small_font = pygame.font.Font(None, 18)
+            except pygame.error as e:
+                raise RuntimeError(f"Could not initialize text rendering: {str(e)}")
+            
+            self.generate_sound_effects()
+            
+            self.clock = pygame.time.Clock()
+            self.nodes = {}
+            self.last_process_check = 0
+            self.process_check_interval = 0.05
+            self.process_update_index = 0
+            self.processes_per_update = 10
+            self.running = True
+            self.total_processes_monitored = 0
+            
+            self.offset_x = 0
+            self.offset_y = 0
+            self.zoom = 1.0
+            self.dragging = False
+            self.last_mouse_pos = None
+            self.new_process_highlight_duration = 5.0
+            
+            self.show_network = True
+            self.show_stats = True
+            self.initial_startup = True
+            self.movement_speed = 0.1
+            self.node_spacing = 100
+            
+            logger.info(f"ProcessVisualizer initialized with window size: {self.width}x{self.height}")
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize ProcessVisualizer: {str(e)}")
+            raise
 
     def generate_sound_effects(self):
         """Generate ascending and descending ping sounds"""
@@ -403,8 +425,24 @@ class ProcessVisualizer:
         glVertex2f(0, self.titlebar_height)
         glEnd()
         
-        title_text = self.font.render("Procify - Process Visualization (Drag to move)", True, (200, 200, 200))
-        self.text_surface.blit(title_text, (10, 5))
+        try:
+            # Create a new surface each frame to avoid memory issues
+            self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            self.text_surface.fill((0, 0, 0, 0))
+            
+            title_text = self.font.render("Procify - Process Visualization (Drag to move)", True, (200, 200, 200))
+            self.text_surface.blit(title_text, (10, 5))
+            
+            # After all OpenGL drawing, render the text surface
+            text_data = pygame.image.tostring(self.text_surface, 'RGBA', True)
+            glRasterPos2d(0, self.height)
+            glPixelZoom(1, -1)
+            glDrawPixels(self.width, self.height, GL_RGBA, GL_UNSIGNED_BYTE, text_data)
+            
+        except Exception as e:
+            logger.error(f"Error rendering text: {str(e)}")
+            # Continue without text rendering if there's an error
+            pass
 
         # First, identify processes that should be visible
         visible_processes = set()
@@ -582,86 +620,96 @@ class ProcessVisualizer:
         help_surface = self.font.render(help_text, True, (150, 150, 150))
         self.text_surface.blit(help_surface, (10, self.height - 30))
 
-        # After all OpenGL drawing, render the text surface
-        text_data = pygame.image.tostring(self.text_surface, 'RGBA', True)
-        glDrawPixels(self.width, self.height, GL_RGBA, GL_UNSIGNED_BYTE, text_data)
-        
         pygame.display.flip()
 
     def update_processes(self):
         current_time = time.time()
         
-        # Always check for new/terminated processes
-        if current_time - self.last_process_check >= self.process_check_interval:
-            self.last_process_check = current_time
-            current_pids = set(p.pid for p in psutil.process_iter())
-            
-            # Quick check for new and terminated processes
-            for pid in current_pids:
-                if pid not in self.nodes:
+        try:
+            # Always check for new/terminated processes
+            if current_time - self.last_process_check >= self.process_check_interval:
+                self.last_process_check = current_time
+                try:
+                    current_pids = set(p.pid for p in psutil.process_iter(['pid']))
+                except Exception as e:
+                    logger.error(f"Error getting process list: {str(e)}")
+                    return
+                
+                # Quick check for new and terminated processes
+                for pid in current_pids:
+                    if pid not in self.nodes:
+                        try:
+                            proc = psutil.Process(pid)
+                            with proc.oneshot():  # More efficient process info gathering
+                                name = proc.name()
+                                pos = self.get_spawn_position()
+                                self.nodes[pid] = ProcessNode(pid, name, pos, current_time, is_initial=self.initial_startup)
+                                self.total_processes_monitored += 1
+                                if not self.initial_startup:
+                                    logger.info(f"New process detected - PID: {pid}, Name: {name}")
+                                    self.start_sound.play()
+                        except (psutil.NoSuchProcess, psutil.AccessDenied, Exception) as e:
+                            logger.debug(f"Could not create process node for PID {pid}: {str(e)}")
+                            continue
+
+                # Handle terminated processes
+                for pid in list(self.nodes.keys()):
+                    if pid not in current_pids:
+                        node = self.nodes[pid]
+                        if node.alpha == 255:
+                            logger.info(f"Process terminated - PID: {pid}, Name: {node.name}")
+                            self.end_sound.play()
+                            node.is_terminating = True
+                            node.color = (1.0, 0.0, 0.0)
+                        node.alpha = max(0, node.alpha - 10)
+                        if node.alpha <= 0:
+                            del self.nodes[pid]
+
+            # Update a batch of processes every frame
+            if self.nodes:
+                pids = list(self.nodes.keys())
+                start_idx = self.process_update_index
+                end_idx = min(start_idx + self.processes_per_update, len(pids))
+                
+                for pid in pids[start_idx:end_idx]:
+                    if pid not in self.nodes:  # Check if node still exists
+                        continue
+                        
+                    node = self.nodes[pid]
                     try:
                         proc = psutil.Process(pid)
-                        name = proc.name()
-                        pos = self.get_spawn_position()
-                        self.nodes[pid] = ProcessNode(pid, name, pos, current_time, is_initial=self.initial_startup)
-                        self.total_processes_monitored += 1
-                        if not self.initial_startup:
-                            logger.info(f"New process detected - PID: {pid}, Name: {name}")
-                            self.start_sound.play()
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
-                        continue
-
-            # Handle terminated processes
-            for pid in list(self.nodes.keys()):
-                if pid not in current_pids:
-                    node = self.nodes[pid]
-                    if node.alpha == 255:
-                        logger.info(f"Process terminated - PID: {pid}, Name: {node.name}")
-                        self.end_sound.play()
-                        node.is_terminating = True
-                        # Change color to red when terminating
-                        node.color = (1.0, 0.0, 0.0)
-                    node.alpha = max(0, node.alpha - 10)
-                    if node.alpha <= 0:
-                        del self.nodes[pid]
-
-        # Update a batch of processes every frame
-        if self.nodes:
-            pids = list(self.nodes.keys())
-            start_idx = self.process_update_index
-            end_idx = min(start_idx + self.processes_per_update, len(pids))
-            
-            for pid in pids[start_idx:end_idx]:
-                node = self.nodes[pid]
-                try:
-                    proc = psutil.Process(pid)
-                    node.cpu_percent = proc.cpu_percent()
-                    node.memory_percent = proc.memory_percent()
-                    node.network_connections = proc.connections()
-                    
-                    try:
-                        new_io = proc.io_counters()
-                        if node.net_io_counters:
-                            bytes_sent_delta = new_io.write_bytes - node.last_bytes_sent
-                            bytes_recv_delta = new_io.read_bytes - node.last_bytes_recv
-                            activity = (bytes_sent_delta + bytes_recv_delta) / (1024 * 1024)
-                            node.network_activity = min(1.0, activity)
-                        node.net_io_counters = new_io
-                        node.last_bytes_sent = new_io.write_bytes
-                        node.last_bytes_recv = new_io.read_bytes
-                    except (psutil.NoSuchProcess, psutil.AccessDenied):
+                        with proc.oneshot():  # Get all process info in one shot
+                            node.cpu_percent = proc.cpu_percent()
+                            node.memory_percent = proc.memory_percent()
+                            node.network_connections = proc.connections()
+                            
+                            try:
+                                new_io = proc.io_counters()
+                                if node.net_io_counters:
+                                    bytes_sent_delta = new_io.write_bytes - node.last_bytes_sent
+                                    bytes_recv_delta = new_io.read_bytes - node.last_bytes_recv
+                                    activity = (bytes_sent_delta + bytes_recv_delta) / (1024 * 1024)
+                                    node.network_activity = min(1.0, activity)
+                                node.net_io_counters = new_io
+                                node.last_bytes_sent = new_io.write_bytes
+                                node.last_bytes_recv = new_io.read_bytes
+                            except (psutil.NoSuchProcess, psutil.AccessDenied, Exception):
+                                node.network_activity *= 0.5
+                    except (psutil.NoSuchProcess, psutil.AccessDenied, Exception) as e:
+                        logger.debug(f"Could not update process info for PID {pid}: {str(e)}")
                         node.network_activity *= 0.5
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    pass
 
-                node.time_alive += self.process_check_interval
-                if node.time_alive >= self.new_process_highlight_duration:
-                    node.is_new = False
+                    node.time_alive += self.process_check_interval
+                    if node.time_alive >= self.new_process_highlight_duration:
+                        node.is_new = False
 
-            # Update index for next frame
-            self.process_update_index = end_idx if end_idx < len(pids) else 0
+                # Update index for next frame
+                self.process_update_index = end_idx if end_idx < len(pids) else 0
 
-        self.initial_startup = False
+            self.initial_startup = False
+            
+        except Exception as e:
+            logger.error(f"Error in update_processes: {str(e)}")
 
     def run(self):
         logger.info("Starting process visualization")
