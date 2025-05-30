@@ -230,3 +230,11 @@
 2025-05-30 16:34:14,121 - INFO - New process node created - PID: 5792, Name: firefox.exe, Memory: 0.2%
 2025-05-30 16:35:16,149 - INFO - New process node created - PID: 5724, Name: dllhost.exe, Memory: 0.0%
 2025-05-30 16:35:40,935 - INFO - New process node created - PID: 2480, Name: firefox.exe, Memory: 0.2%
+2025-05-30 16:36:16,930 - INFO - New process node created - PID: 13920, Name: firefox.exe, Memory: 0.2%
+2025-05-30 16:36:41,561 - INFO - New process node created - PID: 10092, Name: firefox.exe, Memory: 0.2%
+2025-05-30 16:37:40,667 - INFO - New process node created - PID: 14792, Name: firefox.exe, Memory: 0.2%
+2025-05-30 16:38:40,328 - INFO - New process node created - PID: 16136, Name: svchost.exe, Memory: 0.2%
+2025-05-30 16:39:13,013 - INFO - New process node created - PID: 6428, Name: firefox.exe, Memory: 0.2%
+2025-05-30 16:39:17,295 - INFO - New process node created - PID: 3672, Name: WmiPrvSE.exe, Memory: 0.1%
+2025-05-30 16:39:42,810 - INFO - New process node created - PID: 15856, Name: firefox.exe, Memory: 0.2%
+2025-05-30 16:40:07,343 - INFO - Received quit signal

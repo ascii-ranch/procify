@@ -44,8 +44,10 @@ class ProcessNode:
         self.creation_time = creation_time
         self.alpha = 255
         self.base_radius = 8  # Base radius
-        self.max_radius = 40  # Slightly larger maximum for better visibility
+        self.max_radius = 40  # Maximum radius
         self.radius = self.base_radius
+        self.memory_radius = self.base_radius  # Store memory-based radius separately
+        self.cpu_radius_boost = 0  # Additional radius from CPU
         self.is_new = not is_initial
         self.time_alive = 0
         self.is_terminating = False
@@ -61,7 +63,7 @@ class ProcessNode:
                 random.randint(180, 255) / 255.0,
                 random.randint(180, 255) / 255.0
             )
-            self.target_color = (0.0, 0.8, 0.0)  # Target green color
+            self.target_color = (0.0, 0.8, 0.0)
         else:
             self.color = (
                 random.randint(50, 150) / 255.0,
@@ -84,9 +86,9 @@ class ProcessNode:
         try:
             proc = psutil.Process(pid)
             self.parent_pid = proc.ppid()
-            self.memory_percent = proc.memory_percent()  # Get initial memory usage
+            # Just get memory on init, defer CPU measurement to async update
+            self.memory_percent = proc.memory_percent()
             self.network_connections = proc.connections()
-            # Initialize stable connection endpoints
             for conn in self.network_connections:
                 if conn.status == 'ESTABLISHED' and conn.raddr:
                     key = f"{conn.raddr.ip}:{conn.raddr.port}"
@@ -107,22 +109,52 @@ class ProcessNode:
         """Update node state based on current time"""
         self.time_alive = current_time - self.creation_time
         
-        # Update radius based on memory usage with logarithmic scaling
-        # This gives better visibility to both small and large memory users
+        # Calculate base size from memory usage with more dramatic scaling
         if self.memory_percent > 0:
-            # Log scale for memory percentage (adds 1 to avoid log(0))
-            memory_scale = math.log(1 + self.memory_percent) / math.log(101)  # Normalized to 0-1
-            # More dramatic scaling for memory usage
-            target_radius = self.base_radius + (self.max_radius - self.base_radius) * memory_scale
+            # Increased memory scaling (multiplied by 4 instead of 2)
+            memory_scale = math.log(1 + self.memory_percent * 4) / math.log(401)  # Doubled the scale again
+            target_memory_radius = self.base_radius + (self.max_radius - self.base_radius) * 1.2 * memory_scale  # 20% extra range for memory
+            
+            # Debug print for memory scaling
+            if self.memory_percent > 0.1:
+                logger.debug(f"Memory Scaling - Process: {self.name} (PID: {self.pid}), "
+                           f"Memory: {self.memory_percent:.2f}%, Scale: {memory_scale:.3f}, "
+                           f"Base Size: {target_memory_radius:.1f}")
         else:
-            target_radius = self.base_radius
+            target_memory_radius = self.base_radius
         
-        # Smooth radius changes
-        self.radius += (target_radius - self.radius) * 0.3
+        # Smooth memory changes (faster response)
+        self.memory_radius += (target_memory_radius - self.memory_radius) * 0.4
         
-        # Debug logging for significant memory usage
-        if self.memory_percent > 1.0:  # Log if using more than 1% of system memory
-            logger.debug(f"Process {self.name} (PID: {self.pid}) Memory: {self.memory_percent:.1f}%, Radius: {self.radius:.1f}")
+        # Calculate CPU boost using logarithmic scaling
+        if self.cpu_percent > 0:
+            cpu_scale = math.log(1 + self.cpu_percent) / math.log(101)
+            target_cpu_boost = (self.max_radius - self.base_radius) * 0.6 * cpu_scale  # Increased to 60% boost
+            
+            # Debug print for CPU scaling
+            if self.cpu_percent > 1.0:
+                logger.debug(f"CPU Scaling - Process: {self.name} (PID: {self.pid}), "
+                           f"CPU: {self.cpu_percent:.1f}%, Scale: {cpu_scale:.3f}, "
+                           f"Boost: {target_cpu_boost:.1f}")
+        else:
+            target_cpu_boost = 0
+        
+        # Smooth CPU changes
+        self.cpu_radius_boost += (target_cpu_boost - self.cpu_radius_boost) * 0.5
+        
+        # Calculate flash effect based on CPU usage
+        flash_freq = 3 + (self.cpu_percent / 100.0) * 12
+        flash_intensity = 0.7 + (math.sin(current_time * flash_freq) * 0.3)
+        
+        # Combine memory base size and CPU boost with flash effect
+        self.radius = self.memory_radius + (self.cpu_radius_boost * flash_intensity)
+        
+        # Debug logging for significant changes
+        if (self.memory_percent > 0.1 or self.cpu_percent > 1.0) and (self.time_alive % 5 < 0.1):  # Log every 5 seconds
+            logger.debug(f"Final Sizing - Process: {self.name} (PID: {self.pid}), "
+                        f"Memory: {self.memory_percent:.2f}%, CPU: {self.cpu_percent:.1f}%, "
+                        f"Memory Base: {self.memory_radius:.1f}, CPU Boost: {self.cpu_radius_boost:.1f}, "
+                        f"Final: {self.radius:.1f}")
         
         # Update network activity
         try:
@@ -132,9 +164,7 @@ class ProcessNode:
             if time_diff > 0 and self.net_io_counters:
                 bytes_sent_diff = new_io.write_bytes - self.last_bytes_sent
                 bytes_recv_diff = new_io.read_bytes - self.last_bytes_recv
-                # Calculate network activity (bytes per second), normalized between 0 and 1
                 total_bytes_per_sec = (bytes_sent_diff + bytes_recv_diff) / time_diff
-                # More sensitive network activity scale (now 100KB/s instead of 1MB/s)
                 self.network_activity = min(1.0, total_bytes_per_sec / (100 * 1024))
             self.net_io_counters = new_io
             self.last_bytes_sent = new_io.write_bytes
@@ -150,7 +180,6 @@ class ProcessNode:
         # Calculate fade based on time alive
         if self.is_new and self.time_alive > self.new_process_fade_time:
             self.is_new = False
-            # Interpolate color towards target green
             for i in range(3):
                 self.color = tuple(
                     c + (self.target_color[i] - c) * 0.1
@@ -320,28 +349,44 @@ class ProcessVisualizer:
 
     def update_process_data_async(self):
         """Asynchronous process data update"""
+        cpu_init_done = False  # Flag to track if we've done initial CPU measurements
+        
         while self.running:
             try:
-                if time.time() - self.last_process_update >= 1.0:  # Update every second
+                if time.time() - self.last_process_update >= 1.0:
                     current_pids = set(p.pid for p in psutil.process_iter(['pid']))
                     new_process_data = {}
+                    
+                    # If this is the first update, initialize CPU measurements for all processes
+                    if not cpu_init_done:
+                        for pid in current_pids:
+                            try:
+                                proc = psutil.Process(pid)
+                                proc.cpu_percent()  # Initialize CPU monitoring
+                            except (psutil.NoSuchProcess, psutil.AccessDenied):
+                                continue
+                        time.sleep(0.1)  # Single sleep for all processes
+                        cpu_init_done = True
                     
                     for pid in current_pids:
                         try:
                             proc = psutil.Process(pid)
                             with proc.oneshot():
-                                memory_percent = proc.memory_percent()  # Get memory usage
+                                cpu_percent = proc.cpu_percent()
+                                memory_percent = proc.memory_percent()
+                                
                                 new_process_data[pid] = {
                                     'name': proc.name(),
                                     'parent_pid': proc.ppid(),
-                                    'cpu_percent': proc.cpu_percent(),
+                                    'cpu_percent': cpu_percent,
                                     'memory_percent': memory_percent,
                                     'network_connections': proc.connections(),
                                     'is_new': pid not in self.nodes
                                 }
                                 
-                                # Immediate update of existing node's memory usage
+                                # Update existing node's stats
                                 if pid in self.nodes:
+                                    self.nodes[pid].cpu_percent = cpu_percent
                                     self.nodes[pid].memory_percent = memory_percent
                                     
                         except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -352,7 +397,7 @@ class ProcessVisualizer:
                     
                     self.last_process_update = time.time()
                 
-                time.sleep(0.1)  # Short sleep for responsiveness
+                time.sleep(0.1)
                 
             except Exception as e:
                 logger.error(f"Error in process update thread: {str(e)}")
