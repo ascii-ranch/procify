@@ -1,0 +1,590 @@
+2025-05-30 16:26:14,983 - INFO - Starting Procify application
+2025-05-30 16:26:14,983 - INFO - Initializing ProcessVisualizer
+2025-05-30 16:26:15,482 - INFO - Starting process visualization
+2025-05-30 16:26:16,238 - INFO - Initial process node created - PID: 0, Name: System Idle Process, Parent PID: 0
+2025-05-30 16:26:16,259 - INFO - Initial process node created - PID: 4, Name: System, Parent PID: 0
+2025-05-30 16:26:16,280 - INFO - Initial process node created - PID: 4100, Name: IPROSetMonitor.exe, Parent PID: 828
+2025-05-30 16:26:16,303 - INFO - Initial process node created - PID: 7172, Name: conhost.exe, Parent PID: 6868
+2025-05-30 16:26:16,313 - INFO - Initial process node created - PID: 8196, Name: audiodg.exe, Parent PID: 2768
+2025-05-30 16:26:16,337 - INFO - Initial process node created - PID: 8, Name: WUDFHost.exe, Parent PID: 828
+2025-05-30 16:26:16,373 - INFO - Initial process node created - PID: 3088, Name: esif_uf.exe, Parent PID: 828
+2025-05-30 16:26:16,394 - INFO - Initial process node created - PID: 11280, Name: SupportAssistAgent.exe, Parent PID: 828
+2025-05-30 16:26:16,415 - INFO - Initial process node created - PID: 2068, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:16,436 - INFO - Initial process node created - PID: 2084, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:16,467 - INFO - Initial process node created - PID: 2092, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:16,524 - INFO - Initial process node created - PID: 3116, Name: EvtEng.exe, Parent PID: 828
+2025-05-30 16:26:16,561 - INFO - Initial process node created - PID: 4140, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:16,595 - INFO - Initial process node created - PID: 4652, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:16,617 - INFO - Initial process node created - PID: 560, Name: fontdrvhost.exe, Parent PID: 756
+2025-05-30 16:26:16,649 - INFO - Initial process node created - PID: 1584, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:16,677 - INFO - Initial process node created - PID: 12332, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:16,683 - INFO - Initial process node created - PID: 8244, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:16,689 - INFO - Initial process node created - PID: 4152, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:16,709 - INFO - Initial process node created - PID: 13880, Name: DDVRulesProcessor.exe, Parent PID: 828
+2025-05-30 16:26:16,716 - INFO - Initial process node created - PID: 1596, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:16,737 - INFO - Initial process node created - PID: 4156, Name: MpDefenderCoreService.exe, Parent PID: 828
+2025-05-30 16:26:16,758 - INFO - Initial process node created - PID: 576, Name: smss.exe, Parent PID: 4
+2025-05-30 16:26:16,793 - INFO - Initial process node created - PID: 2112, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:16,800 - INFO - Initial process node created - PID: 13376, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:16,820 - INFO - Initial process node created - PID: 1092, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:16,842 - INFO - Initial process node created - PID: 8260, Name: PresentationFontCache.exe, Parent PID: 828
+2025-05-30 16:26:16,848 - INFO - Initial process node created - PID: 9284, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:16,854 - INFO - Initial process node created - PID: 12868, Name: conhost.exe, Parent PID: 8292
+2025-05-30 16:26:16,861 - INFO - Initial process node created - PID: 13892, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:16,892 - INFO - Initial process node created - PID: 14404, Name: DDVCollectorSvcApi.exe, Parent PID: 828
+2025-05-30 16:26:16,925 - INFO - Initial process node created - PID: 4684, Name: WMIRegistrationService.exe, Parent PID: 828
+2025-05-30 16:26:16,944 - INFO - Initial process node created - PID: 14928, Name: SecurityHealthService.exe, Parent PID: 828
+2025-05-30 16:26:16,967 - INFO - Initial process node created - PID: 16976, Name: NisSrv.exe, Parent PID: 828
+2025-05-30 16:26:16,988 - INFO - Initial process node created - PID: 18000, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,008 - INFO - Initial process node created - PID: 596, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,015 - INFO - Initial process node created - PID: 11348, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,051 - INFO - Initial process node created - PID: 1112, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,073 - INFO - Initial process node created - PID: 3164, Name: conhost.exe, Parent PID: 8292
+2025-05-30 16:26:17,106 - INFO - Initial process node created - PID: 6236, Name: WmiPrvSE.exe, Parent PID: 596
+2025-05-30 16:26:17,118 - INFO - Initial process node created - PID: 4704, Name: Cursor.exe, Parent PID: 1136
+2025-05-30 16:26:17,152 - INFO - Initial process node created - PID: 100, Name: Registry, Parent PID: 4
+2025-05-30 16:26:17,163 - INFO - Initial process node created - PID: 8292, Name: Cursor.exe, Parent PID: 1136
+2025-05-30 16:26:17,215 - INFO - Initial process node created - PID: 3692, Name: AggregatorHost.exe, Parent PID: 4000
+2025-05-30 16:26:17,261 - INFO - Initial process node created - PID: 4204, Name: jhi_service.exe, Parent PID: 828
+2025-05-30 16:26:17,271 - INFO - Initial process node created - PID: 1136, Name: Cursor.exe, Parent PID: 8840
+2025-05-30 16:26:17,298 - INFO - Initial process node created - PID: 1140, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,304 - INFO - Initial process node created - PID: 10868, Name: ADNotificationManager.exe, Parent PID: 15560
+2025-05-30 16:26:17,310 - INFO - Initial process node created - PID: 11892, Name: GWIdlMon.exe, Parent PID: 3308
+2025-05-30 16:26:17,332 - INFO - Initial process node created - PID: 13428, Name: ServiceShell.exe, Parent PID: 828
+2025-05-30 16:26:17,365 - INFO - Initial process node created - PID: 2680, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,390 - INFO - Initial process node created - PID: 6780, Name: Dell.CoreServices.Client.exe, Parent PID: 3948
+2025-05-30 16:26:17,410 - INFO - Initial process node created - PID: 8316, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,417 - INFO - Initial process node created - PID: 11900, Name: conhost.exe, Parent PID: 11892
+2025-05-30 16:26:17,423 - INFO - Initial process node created - PID: 10368, Name: SDXHelper.exe, Parent PID: 596
+2025-05-30 16:26:17,428 - INFO - Initial process node created - PID: 2180, Name: dllhost.exe, Parent PID: 596
+2025-05-30 16:26:17,449 - INFO - Initial process node created - PID: 4228, Name: dasHost.exe, Parent PID: 3960
+2025-05-30 16:26:17,470 - INFO - Initial process node created - PID: 7812, Name: SearchIndexer.exe, Parent PID: 828
+2025-05-30 16:26:17,487 - INFO - Initial process node created - PID: 648, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,530 - INFO - Initial process node created - PID: 13960, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,563 - INFO - Initial process node created - PID: 2700, Name: conhost.exe, Parent PID: 7044
+2025-05-30 16:26:17,596 - INFO - Initial process node created - PID: 8332, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,607 - INFO - Initial process node created - PID: 15500, Name: AdobeCollabSync.exe, Parent PID: 15560
+2025-05-30 16:26:17,648 - INFO - Initial process node created - PID: 17036, Name: cmd.exe, Parent PID: 8488
+2025-05-30 16:26:17,681 - INFO - Initial process node created - PID: 1680, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,691 - INFO - Initial process node created - PID: 5264, Name: python.exe, Parent PID: 17036
+2025-05-30 16:26:17,725 - INFO - Initial process node created - PID: 5776, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,741 - INFO - Initial process node created - PID: 14992, Name: Cursor.exe, Parent PID: 1136
+2025-05-30 16:26:17,791 - INFO - Initial process node created - PID: 7316, Name: Dell.TechHub.DataManager.SubAgent.exe, Parent PID: 3948
+2025-05-30 16:26:17,814 - INFO - Initial process node created - PID: 16532, Name: Cursor.exe, Parent PID: 14992
+2025-05-30 16:26:17,848 - INFO - Initial process node created - PID: 664, Name: csrss.exe, Parent PID: 652
+2025-05-30 16:26:17,859 - INFO - Initial process node created - PID: 9880, Name: RuntimeBroker.exe, Parent PID: 596
+2025-05-30 16:26:17,870 - INFO - Initial process node created - PID: 11928, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:17,881 - INFO - Initial process node created - PID: 2204, Name: StartMenuExperienceHost.exe, Parent PID: 596
+2025-05-30 16:26:17,887 - INFO - Initial process node created - PID: 6812, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:17,894 - INFO - Initial process node created - PID: 5280, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:17,915 - INFO - Initial process node created - PID: 3240, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,954 - INFO - Initial process node created - PID: 7336, Name: Dell.TechHub.Instrumentation.SubAgent.exe, Parent PID: 3948
+2025-05-30 16:26:17,974 - INFO - Initial process node created - PID: 5808, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:17,980 - INFO - Initial process node created - PID: 11440, Name: CompPkgSrv.exe, Parent PID: 596
+2025-05-30 16:26:17,987 - INFO - Initial process node created - PID: 13488, Name: ApplicationFrameHost.exe, Parent PID: 596
+2025-05-30 16:26:18,010 - INFO - Initial process node created - PID: 692, Name: fontdrvhost.exe, Parent PID: 892
+2025-05-30 16:26:18,043 - INFO - Initial process node created - PID: 2228, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,094 - INFO - Initial process node created - PID: 7348, Name: conhost.exe, Parent PID: 7316
+2025-05-30 16:26:18,117 - INFO - Initial process node created - PID: 12468, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:18,128 - INFO - Initial process node created - PID: 3256, Name: Cursor.exe, Parent PID: 1136
+2025-05-30 16:26:18,161 - INFO - Initial process node created - PID: 8376, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,172 - INFO - Initial process node created - PID: 6332, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:18,198 - INFO - Initial process node created - PID: 1732, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,224 - INFO - Initial process node created - PID: 4804, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,287 - INFO - Initial process node created - PID: 7364, Name: conhost.exe, Parent PID: 7336
+2025-05-30 16:26:18,320 - INFO - Initial process node created - PID: 7876, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,352 - INFO - Initial process node created - PID: 3272, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,365 - INFO - Initial process node created - PID: 14532, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,376 - INFO - Initial process node created - PID: 15560, Name: AdobeCollabSync.exe, Parent PID: 9044
+2025-05-30 16:26:18,427 - INFO - Initial process node created - PID: 3788, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,472 - INFO - Initial process node created - PID: 4300, Name: AuActMon.exe, Parent PID: 3868
+2025-05-30 16:26:18,482 - INFO - Initial process node created - PID: 7164, Name: Cursor.exe, Parent PID: 1136
+2025-05-30 16:26:18,504 - INFO - Initial process node created - PID: 2768, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,526 - INFO - Initial process node created - PID: 5840, Name: Dell.Update.SubAgent.exe, Parent PID: 3948
+2025-05-30 16:26:18,531 - INFO - Initial process node created - PID: 16592, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:18,553 - INFO - Initial process node created - PID: 6868, Name: Dell.TechHub.Analytics.SubAgent.exe, Parent PID: 3948
+2025-05-30 16:26:18,590 - INFO - Initial process node created - PID: 2264, Name: MemCompression, Parent PID: 4
+2025-05-30 16:26:18,611 - INFO - Initial process node created - PID: 6880, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,616 - INFO - Initial process node created - PID: 11488, Name: WavesSvc64.exe, Parent PID: 8840
+2025-05-30 16:26:18,637 - INFO - Initial process node created - PID: 12000, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,658 - INFO - Initial process node created - PID: 4328, Name: AuDBServer.exe, Parent PID: 3868
+2025-05-30 16:26:18,680 - INFO - Initial process node created - PID: 4840, Name: conhost.exe, Parent PID: 5840
+2025-05-30 16:26:18,714 - INFO - Initial process node created - PID: 3308, Name: GWCtlSrv.exe, Parent PID: 828
+2025-05-30 16:26:18,745 - INFO - Initial process node created - PID: 7920, Name: dllhost.exe, Parent PID: 596
+2025-05-30 16:26:18,780 - INFO - Initial process node created - PID: 756, Name: wininit.exe, Parent PID: 652
+2025-05-30 16:26:18,817 - INFO - Initial process node created - PID: 2292, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,842 - INFO - Initial process node created - PID: 7416, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:18,855 - INFO - Initial process node created - PID: 8440, Name: igfxEM.exe, Parent PID: 2408
+2025-05-30 16:26:18,894 - INFO - Initial process node created - PID: 764, Name: csrss.exe, Parent PID: 748
+2025-05-30 16:26:18,931 - INFO - Initial process node created - PID: 5884, Name: unsecapp.exe, Parent PID: 596
+2025-05-30 16:26:18,943 - INFO - Initial process node created - PID: 14076, Name: Cursor.exe, Parent PID: 14992
+2025-05-30 16:26:19,000 - INFO - Initial process node created - PID: 1280, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,012 - INFO - Initial process node created - PID: 4864, Name: RuntimeBroker.exe, Parent PID: 596
+2025-05-30 16:26:19,024 - INFO - Initial process node created - PID: 15104, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:19,062 - INFO - Initial process node created - PID: 1796, Name: IntelCpHeciSvc.exe, Parent PID: 828
+2025-05-30 16:26:19,106 - INFO - Initial process node created - PID: 1288, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,136 - INFO - Initial process node created - PID: 1292, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,162 - INFO - Initial process node created - PID: 3344, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,170 - INFO - Initial process node created - PID: 6416, Name: Cursor.exe, Parent PID: 14992
+2025-05-30 16:26:19,179 - INFO - Initial process node created - PID: 792, Name: Cursor.exe, Parent PID: 1136
+2025-05-30 16:26:19,188 - INFO - Initial process node created - PID: 7960, Name: taskhostw.exe, Parent PID: 1732
+2025-05-30 16:26:19,196 - INFO - Initial process node created - PID: 11544, Name: RuntimeBroker.exe, Parent PID: 596
+2025-05-30 16:26:19,238 - INFO - Initial process node created - PID: 3868, Name: AuWatchDogService.exe, Parent PID: 828
+2025-05-30 16:26:19,263 - INFO - Initial process node created - PID: 4380, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,290 - INFO - Initial process node created - PID: 5916, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,297 - INFO - Initial process node created - PID: 13084, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:19,323 - INFO - Initial process node created - PID: 3876, Name: armsvc.exe, Parent PID: 828
+2025-05-30 16:26:19,356 - INFO - Initial process node created - PID: 7972, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,398 - INFO - Initial process node created - PID: 1832, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,424 - INFO - Initial process node created - PID: 2856, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,431 - INFO - Initial process node created - PID: 8488, Name: explorer.exe, Parent PID: 892
+2025-05-30 16:26:19,441 - INFO - Initial process node created - PID: 17704, Name: taskhostw.exe, Parent PID: 1732
+2025-05-30 16:26:19,468 - INFO - Initial process node created - PID: 3884, Name: OfficeClickToRun.exe, Parent PID: 828
+2025-05-30 16:26:19,493 - INFO - Initial process node created - PID: 2864, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,572 - INFO - Initial process node created - PID: 3376, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,616 - INFO - Initial process node created - PID: 4400, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,647 - INFO - Initial process node created - PID: 9012, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,685 - INFO - Initial process node created - PID: 14132, Name: IAStorDataMgrSvc.exe, Parent PID: 828
+2025-05-30 16:26:19,728 - INFO - Initial process node created - PID: 2872, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,767 - INFO - Initial process node created - PID: 3896, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,823 - INFO - Initial process node created - PID: 4408, Name: conhost.exe, Parent PID: 4328
+2025-05-30 16:26:19,857 - INFO - Initial process node created - PID: 16696, Name: conhost.exe, Parent PID: 17036
+2025-05-30 16:26:19,908 - INFO - Initial process node created - PID: 828, Name: services.exe, Parent PID: 756
+2025-05-30 16:26:19,944 - INFO - Initial process node created - PID: 2368, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:19,956 - INFO - Initial process node created - PID: 9024, Name: Cursor.exe, Parent PID: 1136
+2025-05-30 16:26:19,997 - INFO - Initial process node created - PID: 9536, Name: UserOOBEBroker.exe, Parent PID: 596
+2025-05-30 16:26:20,038 - INFO - Initial process node created - PID: 836, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,051 - INFO - Initial process node created - PID: 13128, Name: powershell.exe, Parent PID: 8292
+2025-05-30 16:26:20,063 - INFO - Initial process node created - PID: 3404, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:20,075 - INFO - Initial process node created - PID: 12108, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:20,120 - INFO - Initial process node created - PID: 8016, Name: Dell.TechHub.Instrumentation.UserProcess.exe, Parent PID: 7336
+2025-05-30 16:26:20,173 - INFO - Initial process node created - PID: 2388, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,212 - INFO - Initial process node created - PID: 4440, Name: mDNSResponder.exe, Parent PID: 828
+2025-05-30 16:26:20,222 - INFO - Initial process node created - PID: 9048, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:20,249 - INFO - Initial process node created - PID: 13656, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,282 - INFO - Initial process node created - PID: 2908, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,302 - INFO - Initial process node created - PID: 8540, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,307 - INFO - Initial process node created - PID: 10588, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:20,313 - INFO - Initial process node created - PID: 15708, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:20,335 - INFO - Initial process node created - PID: 4448, Name: TbtP2pShortcutService.exe, Parent PID: 828
+2025-05-30 16:26:20,341 - INFO - Initial process node created - PID: 9568, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,348 - INFO - Initial process node created - PID: 11616, Name: AuTray.exe, Parent PID: 8840
+2025-05-30 16:26:20,374 - INFO - Initial process node created - PID: 2408, Name: igfxCUIService.exe, Parent PID: 828
+2025-05-30 16:26:20,395 - INFO - Initial process node created - PID: 4456, Name: ThunderboltService.exe, Parent PID: 828
+2025-05-30 16:26:20,415 - INFO - Initial process node created - PID: 876, Name: lsass.exe, Parent PID: 756
+2025-05-30 16:26:20,438 - INFO - Initial process node created - PID: 1388, Name: dwm.exe, Parent PID: 892
+2025-05-30 16:26:20,460 - INFO - Initial process node created - PID: 3948, Name: Dell.TechHub.exe, Parent PID: 828
+2025-05-30 16:26:20,481 - INFO - Initial process node created - PID: 7532, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,513 - INFO - Initial process node created - PID: 4464, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,543 - INFO - Initial process node created - PID: 14192, Name: DDVDataCollector.exe, Parent PID: 828
+2025-05-30 16:26:20,554 - INFO - Initial process node created - PID: 17264, Name: Cursor.exe, Parent PID: 6416
+2025-05-30 16:26:20,590 - INFO - Initial process node created - PID: 1908, Name: MoUsoCoreWorker.exe, Parent PID: 596
+2025-05-30 16:26:20,602 - INFO - Initial process node created - PID: 10100, Name: powershell.exe, Parent PID: 8292
+2025-05-30 16:26:20,668 - INFO - Initial process node created - PID: 3960, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,709 - INFO - Initial process node created - PID: 4472, Name: RstMwService.exe, Parent PID: 828
+2025-05-30 16:26:20,741 - INFO - Initial process node created - PID: 892, Name: winlogon.exe, Parent PID: 748
+2025-05-30 16:26:20,766 - INFO - Initial process node created - PID: 5500, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,805 - INFO - Initial process node created - PID: 9600, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,860 - INFO - Initial process node created - PID: 4484, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:20,909 - INFO - Initial process node created - PID: 7044, Name: Dell.TechHub.Diagnostics.SubAgent.exe, Parent PID: 3948
+2025-05-30 16:26:20,926 - INFO - Initial process node created - PID: 10628, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:20,970 - INFO - Initial process node created - PID: 5004, Name: SearchApp.exe, Parent PID: 596
+2025-05-30 16:26:21,039 - INFO - Initial process node created - PID: 3476, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,055 - INFO - Initial process node created - PID: 8604, Name: ctfmon.exe, Parent PID: 8540
+2025-05-30 16:26:21,073 - INFO - Initial process node created - PID: 10652, Name: firefox.exe, Parent PID: 604
+2025-05-30 16:26:21,125 - INFO - Initial process node created - PID: 4000, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,140 - INFO - Initial process node created - PID: 13216, Name: CodeSetup-stable-0.50.7.exe, Parent PID: 1136
+2025-05-30 16:26:21,159 - INFO - Initial process node created - PID: 2468, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,181 - INFO - Initial process node created - PID: 3496, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,204 - INFO - Initial process node created - PID: 1452, Name: IntelCpHDCPSvc.exe, Parent PID: 828
+2025-05-30 16:26:21,225 - INFO - Initial process node created - PID: 3504, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,245 - INFO - Initial process node created - PID: 4016, Name: WmiPrvSE.exe, Parent PID: 596
+2025-05-30 16:26:21,269 - INFO - Initial process node created - PID: 15280, Name: python.exe, Parent PID: 5264
+2025-05-30 16:26:21,291 - INFO - Initial process node created - PID: 4532, Name: WavesSysSvc64.exe, Parent PID: 828
+2025-05-30 16:26:21,313 - INFO - Initial process node created - PID: 4024, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,334 - INFO - Initial process node created - PID: 13756, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,340 - INFO - Initial process node created - PID: 4544, Name: Cursor.exe, Parent PID: 1136
+2025-05-30 16:26:21,362 - INFO - Initial process node created - PID: 9152, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,369 - INFO - Initial process node created - PID: 10688, Name: RuntimeBroker.exe, Parent PID: 596
+2025-05-30 16:26:21,375 - INFO - Initial process node created - PID: 1476, Name: TextInputHost.exe, Parent PID: 596
+2025-05-30 16:26:21,394 - INFO - Initial process node created - PID: 9160, Name: ShellExperienceHost.exe, Parent PID: 596
+2025-05-30 16:26:21,414 - INFO - Initial process node created - PID: 1996, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,436 - INFO - Initial process node created - PID: 8652, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,442 - INFO - Initial process node created - PID: 12748, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:21,448 - INFO - Initial process node created - PID: 3536, Name: Cursor.exe, Parent PID: 14992
+2025-05-30 16:26:21,459 - INFO - Initial process node created - PID: 15828, Name: taskhostw.exe, Parent PID: 1732
+2025-05-30 16:26:21,470 - INFO - Initial process node created - PID: 6616, Name: sihost.exe, Parent PID: 1112
+2025-05-30 16:26:21,481 - INFO - Initial process node created - PID: 7640, Name: notepad.exe, Parent PID: 6464
+2025-05-30 16:26:21,510 - INFO - Initial process node created - PID: 1504, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,549 - INFO - Initial process node created - PID: 5088, Name: tunmgr.exe, Parent PID: 828
+2025-05-30 16:26:21,571 - INFO - Initial process node created - PID: 3556, Name: spoolsv.exe, Parent PID: 828
+2025-05-30 16:26:21,577 - INFO - Initial process node created - PID: 18404, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:21,585 - INFO - Initial process node created - PID: 12776, Name: CodeSetup-stable-0.50.7.tmp, Parent PID: 13216
+2025-05-30 16:26:21,605 - INFO - Initial process node created - PID: 4588, Name: MsMpEng.exe, Parent PID: 828
+2025-05-30 16:26:21,637 - INFO - Initial process node created - PID: 7148, Name: BbDevMgr.exe, Parent PID: 828
+2025-05-30 16:26:21,661 - INFO - Initial process node created - PID: 3056, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,683 - INFO - Initial process node created - PID: 1524, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,704 - INFO - Initial process node created - PID: 2548, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,725 - INFO - Initial process node created - PID: 10232, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,755 - INFO - Initial process node created - PID: 2556, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:26:21,778 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:21,788 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:21,842 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:21,895 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:21,952 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,027 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,054 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,105 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,158 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,204 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,288 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,311 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,359 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,438 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,471 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,519 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,565 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,621 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,693 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,737 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,793 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,839 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,889 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,956 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:22,992 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,040 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,094 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,142 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,235 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,256 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,307 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,386 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,414 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,462 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,514 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,570 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,655 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,678 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,727 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,776 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,827 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,891 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:23,939 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,023 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,045 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,094 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,172 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,204 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,253 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,308 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,359 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,438 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,475 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,531 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,601 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,638 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,672 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,724 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,782 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,855 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,899 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:24,968 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:25,000 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:25,038 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:25,088 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:25,140 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:25,217 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:25,261 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:25,339 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:25,362 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:25,412 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'
+2025-05-30 16:26:31,810 - INFO - Received quit signal
+2025-05-30 16:26:31,838 - ERROR - Error in draw method: 'ProcessNode' object has no attribute 'color'
+Traceback (most recent call last):
+  File "C:\Users\Station5\Documents\Python Scripts\procify\procify.py", line 879, in draw
+    color = (*node.color[:3], node_alpha)
+AttributeError: 'ProcessNode' object has no attribute 'color'

@@ -43,7 +43,8 @@ class ProcessNode:
         self.velocity = [0.0, 0.0]
         self.creation_time = creation_time
         self.alpha = 255
-        self.base_radius = 8  # Increased base radius
+        self.base_radius = 8  # Base radius
+        self.max_radius = 40  # Slightly larger maximum for better visibility
         self.radius = self.base_radius
         self.is_new = not is_initial
         self.time_alive = 0
@@ -52,14 +53,15 @@ class ProcessNode:
         self.new_process_fade_time = 10.0
         self.flash_frequency = 10.0
         self.terminating_flash_frequency = 15.0
-        # Brighter colors for new processes
+        
+        # Color initialization
         if self.is_new:
             self.color = (
                 random.randint(180, 255) / 255.0,
                 random.randint(180, 255) / 255.0,
                 random.randint(180, 255) / 255.0
             )
-            self.target_color = (0.0, 0.8, 0.0)
+            self.target_color = (0.0, 0.8, 0.0)  # Target green color
         else:
             self.color = (
                 random.randint(50, 150) / 255.0,
@@ -67,10 +69,10 @@ class ProcessNode:
                 random.randint(50, 150) / 255.0
             )
             self.target_color = self.color
+            
         self.parent_pid = None
         self.cpu_percent = 0.0
         self.memory_percent = 0.0
-        self.network_connections = []
         self.last_update = time.time()
         self.net_io_counters = None
         self.last_bytes_sent = 0
@@ -82,8 +84,7 @@ class ProcessNode:
         try:
             proc = psutil.Process(pid)
             self.parent_pid = proc.ppid()
-            proc.cpu_percent()
-            self.memory_percent = proc.memory_percent()
+            self.memory_percent = proc.memory_percent()  # Get initial memory usage
             self.network_connections = proc.connections()
             # Initialize stable connection endpoints
             for conn in self.network_connections:
@@ -98,7 +99,7 @@ class ProcessNode:
                 self.last_bytes_recv = self.net_io_counters.read_bytes
             except (psutil.NoSuchProcess, psutil.AccessDenied):
                 pass
-            logger.info(f"{'Initial' if is_initial else 'New'} process node created - PID: {pid}, Name: {name}, Parent PID: {self.parent_pid}")
+            logger.info(f"{'Initial' if is_initial else 'New'} process node created - PID: {pid}, Name: {name}, Memory: {self.memory_percent:.1f}%")
         except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
             logger.warning(f"Could not get process info for {pid} ({name}): {str(e)}")
 
@@ -106,10 +107,22 @@ class ProcessNode:
         """Update node state based on current time"""
         self.time_alive = current_time - self.creation_time
         
-        # Update radius based on CPU usage (between 8 and 30 pixels)
-        target_radius = self.base_radius + (self.cpu_percent / 100.0) * 22
+        # Update radius based on memory usage with logarithmic scaling
+        # This gives better visibility to both small and large memory users
+        if self.memory_percent > 0:
+            # Log scale for memory percentage (adds 1 to avoid log(0))
+            memory_scale = math.log(1 + self.memory_percent) / math.log(101)  # Normalized to 0-1
+            # More dramatic scaling for memory usage
+            target_radius = self.base_radius + (self.max_radius - self.base_radius) * memory_scale
+        else:
+            target_radius = self.base_radius
+        
         # Smooth radius changes
         self.radius += (target_radius - self.radius) * 0.3
+        
+        # Debug logging for significant memory usage
+        if self.memory_percent > 1.0:  # Log if using more than 1% of system memory
+            logger.debug(f"Process {self.name} (PID: {self.pid}) Memory: {self.memory_percent:.1f}%, Radius: {self.radius:.1f}")
         
         # Update network activity
         try:
@@ -309,7 +322,7 @@ class ProcessVisualizer:
         """Asynchronous process data update"""
         while self.running:
             try:
-                if time.time() - self.last_process_update >= 2.0:  # 2 second interval
+                if time.time() - self.last_process_update >= 1.0:  # Update every second
                     current_pids = set(p.pid for p in psutil.process_iter(['pid']))
                     new_process_data = {}
                     
@@ -317,24 +330,19 @@ class ProcessVisualizer:
                         try:
                             proc = psutil.Process(pid)
                             with proc.oneshot():
-                                # Get CPU percent first to initialize it
-                                cpu_percent = proc.cpu_percent()
-                                # Wait a tiny bit to get a real CPU value
-                                time.sleep(0.1)
-                                cpu_percent = proc.cpu_percent()
-                                
+                                memory_percent = proc.memory_percent()  # Get memory usage
                                 new_process_data[pid] = {
                                     'name': proc.name(),
                                     'parent_pid': proc.ppid(),
-                                    'cpu_percent': cpu_percent,
-                                    'memory_percent': proc.memory_percent(),
+                                    'cpu_percent': proc.cpu_percent(),
+                                    'memory_percent': memory_percent,
                                     'network_connections': proc.connections(),
                                     'is_new': pid not in self.nodes
                                 }
                                 
-                                # Update existing node's CPU usage immediately if it exists
+                                # Immediate update of existing node's memory usage
                                 if pid in self.nodes:
-                                    self.nodes[pid].cpu_percent = cpu_percent
+                                    self.nodes[pid].memory_percent = memory_percent
                                     
                         except (psutil.NoSuchProcess, psutil.AccessDenied):
                             continue
@@ -344,11 +352,11 @@ class ProcessVisualizer:
                     
                     self.last_process_update = time.time()
                 
-                time.sleep(0.1)  # Sleep to prevent high CPU usage
+                time.sleep(0.1)  # Short sleep for responsiveness
                 
             except Exception as e:
                 logger.error(f"Error in process update thread: {str(e)}")
-                time.sleep(1)  # Sleep longer on error
+                time.sleep(1)
 
     def apply_process_updates(self):
         """Apply buffered process updates"""
@@ -365,7 +373,8 @@ class ProcessVisualizer:
         for pid, data in new_process_data.items():
             if pid not in self.nodes:
                 pos = self.get_spawn_position()
-                self.nodes[pid] = ProcessNode(pid, data['name'], pos, time.time(), is_initial=False)
+                node = ProcessNode(pid, data['name'], pos, time.time(), is_initial=False)
+                self.nodes[pid] = node
                 self.total_processes_monitored += 1
                 if not self.initial_startup:
                     self.start_sound.play()
@@ -373,9 +382,13 @@ class ProcessVisualizer:
             # Update existing node data
             node = self.nodes[pid]
             node.parent_pid = data['parent_pid']
-            node.cpu_percent = data['cpu_percent']
+            node.cpu_percent = data['cpu_percent']  # Make sure CPU data is being updated
             node.memory_percent = data['memory_percent']
             node.network_connections = data['network_connections']
+            
+            # Debug logging for CPU usage
+            if node.cpu_percent > 0:
+                logger.debug(f"Process {node.name} (PID: {node.pid}) CPU: {node.cpu_percent}%, Radius: {node.radius}")
         
         # Handle terminated processes
         for pid in list(self.nodes.keys()):

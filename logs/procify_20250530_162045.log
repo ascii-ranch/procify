@@ -230,3 +230,9 @@
 2025-05-30 16:20:53,191 - INFO - Initial process node created - PID: 2548, Name: svchost.exe, Parent PID: 828
 2025-05-30 16:20:53,237 - INFO - Initial process node created - PID: 10232, Name: svchost.exe, Parent PID: 828
 2025-05-30 16:20:53,282 - INFO - Initial process node created - PID: 2556, Name: svchost.exe, Parent PID: 828
+2025-05-30 16:22:13,332 - INFO - New process node created - PID: 2584, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:22:13,340 - INFO - New process node created - PID: 8404, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:23:11,559 - INFO - New process node created - PID: 17152, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:24:10,093 - INFO - New process node created - PID: 8244, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:24:39,429 - INFO - New process node created - PID: 15104, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:26:09,301 - INFO - New process node created - PID: 10588, Name: firefox.exe, Parent PID: 10652
