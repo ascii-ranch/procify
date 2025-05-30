@@ -49,6 +49,8 @@ class ProcessNode:
         self.is_terminating = False
         self.text_fade_time = 5.0  # Text fades after 5 seconds
         self.new_process_fade_time = 10.0  # New process status fades after 10 seconds
+        self.flash_frequency = 10.0  # Base flash frequency
+        self.terminating_flash_frequency = 15.0  # Faster flash for terminating
         # Brighter colors for new processes
         if self.is_new:
             self.color = (
@@ -98,6 +100,35 @@ class ProcessNode:
             logger.info(f"{'Initial' if is_initial else 'New'} process node created - PID: {pid}, Name: {name}, Parent PID: {self.parent_pid}")
         except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
             logger.warning(f"Could not get process info for {pid} ({name}): {str(e)}")
+
+    def update(self, current_time: float):
+        """Update node state based on current time"""
+        self.time_alive = current_time - self.creation_time
+        
+        # Calculate flash intensity based on state
+        flash_freq = self.terminating_flash_frequency if self.is_terminating else self.flash_frequency
+        flash_intensity = math.sin(current_time * flash_freq) * 0.5 + 0.5
+        
+        # Calculate fade based on time alive
+        if self.is_new and self.time_alive > self.new_process_fade_time:
+            self.is_new = False
+            # Interpolate color towards target green
+            for i in range(3):
+                self.color = tuple(
+                    c + (self.target_color[i] - c) * 0.1
+                    for i, c in enumerate(self.color)
+                )
+        
+        # Calculate visibility alpha
+        if self.is_terminating:
+            self.alpha = max(0, self.alpha - 10)
+        elif self.is_new and self.time_alive > self.text_fade_time:
+            fade_progress = (self.time_alive - self.text_fade_time) / (self.new_process_fade_time - self.text_fade_time)
+            self.text_alpha = int(255 * (1 - fade_progress))
+        else:
+            self.text_alpha = 255
+        
+        return flash_intensity
 
 class ProcessVisualizer:
     def __init__(self):
@@ -176,9 +207,10 @@ class ProcessVisualizer:
                 pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             ]
             self.current_text_surface = 0
-            self.font = pygame.font.SysFont('Consolas', 12)  # Even smaller main font
-            self.small_font = pygame.font.SysFont('Consolas', 10)  # Smaller stats font
-            self.tiny_font = pygame.font.SysFont('Consolas', 9)  # Tiny font for controls
+            # Use bold fonts for all text
+            self.font = pygame.font.SysFont('Consolas', 12, bold=True)
+            self.small_font = pygame.font.SysFont('Consolas', 10, bold=True)
+            self.tiny_font = pygame.font.SysFont('Consolas', 11, bold=True)  # Slightly larger for controls
             
             self.generate_sound_effects()
             
@@ -766,65 +798,38 @@ class ProcessVisualizer:
                                 self.draw_line(screen_pos, end_pos, color, thickness)
 
             # Draw nodes
+            current_time = time.time()
             for node in self.nodes.values():
                 if node.pid in visible_processes:
                     screen_pos = self.world_to_screen(node.pos)
                     
-                    # Draw highlight for new processes
-                    if node.is_new:
-                        glow_radius = node.radius + 5 + math.sin(time.time() * 5) * 2
-                        glow_color = (1.0, 1.0, 0.4, node.alpha / 255.0)
+                    # Update node state and get flash intensity
+                    flash_intensity = node.update(current_time)
+                    
+                    # Draw highlight for new or terminating processes
+                    if node.is_new or node.is_terminating:
+                        glow_radius = node.radius + 5 + (flash_intensity * 2)
+                        base_alpha = node.alpha / 255.0
+                        
+                        # Calculate glow alpha
+                        if node.is_terminating:
+                            glow_alpha = base_alpha * flash_intensity
+                            glow_color = (1.0, 0.0, 0.0, glow_alpha)  # Pure red for terminating
+                        else:
+                            if node.time_alive > node.text_fade_time:
+                                fade_progress = (node.time_alive - node.text_fade_time) / (node.new_process_fade_time - node.text_fade_time)
+                                glow_alpha = base_alpha * (1 - fade_progress) * flash_intensity
+                            else:
+                                glow_alpha = base_alpha * flash_intensity
+                            glow_color = (1.0, 1.0, 0.4, glow_alpha)  # Yellow for new
+                        
                         self.draw_circle(screen_pos[0], screen_pos[1], glow_radius, glow_color)
 
                     # Draw node
-                    color = (*node.color[:3], node.alpha / 255.0)
+                    node_alpha = node.alpha / 255.0
+                    color = (*node.color[:3], node_alpha)
                     self.draw_circle(screen_pos[0], screen_pos[1], node.radius, color)
 
-            # Draw IP frequency bar graph if enabled
-            if self.show_network and self.show_bar_graph:
-                self.draw_bar_graph()
-
-            # Draw all text after OpenGL rendering
-            glDisable(GL_DEPTH_TEST)
-            
-            # Draw title and FPS
-            title_text = self.font.render("Procify - Process Visualization", True, (200, 200, 200))
-            self.text_surfaces[self.current_text_surface].blit(title_text, (10, 5))
-
-            # Draw FPS right next to title
-            if self.show_stats:
-                try:
-                    current_fps = min(1000, 1.0 / max(self.min_frame_time, self.avg_frame_time))
-                    fps_text = f"| FPS: {current_fps:.1f} | Frame Time: {self.avg_frame_time*1000:.1f}ms"
-                    fps_surface = self.font.render(fps_text, True, (150, 150, 150))
-                    self.text_surfaces[self.current_text_surface].blit(fps_surface, (title_text.get_width() + 20, 5))
-                except Exception as e:
-                    logger.error(f"Error rendering performance stats: {str(e)}")
-
-            # Draw controls help with tiny font
-            help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | P = Toggle Parent Edges | T = Toggle Titles | H = Hide Network Processes | ESC = Exit"
-            help_surface = self.tiny_font.render(help_text, True, (150, 150, 150))
-            self.text_surfaces[self.current_text_surface].blit(help_surface, (10, self.height - 20))
-
-            # Draw process names and stats
-            for node in self.nodes.values():
-                if node.pid in visible_processes and node.alpha > 128:
-                    screen_pos = self.world_to_screen(node.pos)
-                    
-                    # Update node timing and colors
-                    current_time = time.time()
-                    node.time_alive = current_time - node.creation_time
-                    
-                    # Handle new process transition
-                    if node.is_new and node.time_alive > node.new_process_fade_time:
-                        node.is_new = False
-                        # Interpolate color towards target green
-                        for i in range(3):
-                            node.color = tuple(
-                                c + (node.target_color[i] - c) * 0.1
-                                for i, c in enumerate(node.color)
-                            )
-                    
                     try:
                         # Only render text if show_titles is enabled or the process is new/terminating
                         should_show_text = (self.show_titles or 
@@ -834,20 +839,16 @@ class ProcessVisualizer:
                         if should_show_text:
                             # Render process name with PID
                             name_color = (255, 0, 0) if node.is_terminating else (
-                                (255, 255, 100) if node.is_new else (200, 200, 200)
+                                (255, 255, 100) if node.is_new else (255, 255, 255)
                             )
                             name_text = self.font.render(f"{node.name} (PID: {node.pid})", True, name_color)
                             
                             # Calculate text position (to the right of the node)
                             text_x = int(screen_pos[0] + node.radius + 10)
-                            text_y = int(screen_pos[1] - name_text.get_height() // 2)  # Vertically centered
+                            text_y = int(screen_pos[1] - name_text.get_height() // 2)
                             
-                            # Calculate text alpha for fading
-                            text_alpha = 255
-                            if node.is_new and node.time_alive > node.text_fade_time:
-                                text_alpha = max(0, 255 * (1 - (node.time_alive - node.text_fade_time)))
-                            elif node.is_terminating:
-                                text_alpha = node.alpha
+                            # Use node's calculated text alpha
+                            text_alpha = node.text_alpha if hasattr(node, 'text_alpha') else node.alpha
                             
                             # Draw text with background
                             text_bg = pygame.Surface((name_text.get_width() + 10, name_text.get_height() + 4), pygame.SRCALPHA)
@@ -862,12 +863,38 @@ class ProcessVisualizer:
                             # Draw stats if enabled (below the name)
                             if self.show_stats:
                                 stats_text = f"CPU: {node.cpu_percent:.1f}% MEM: {node.memory_percent:.1f}%"
-                                stats_surface = self.small_font.render(stats_text, True, (150, 150, 150))
+                                stats_surface = self.small_font.render(stats_text, True, (255, 255, 255))
                                 stats_surface.set_alpha(int(text_alpha))
                                 self.text_surfaces[self.current_text_surface].blit(stats_surface, (text_x, text_y + name_text.get_height()))
                                     
                     except Exception as e:
                         logger.error(f"Error rendering process text: {str(e)}")
+
+            # Draw IP frequency bar graph if enabled
+            if self.show_network and self.show_bar_graph:
+                self.draw_bar_graph()
+
+            # Draw all text after OpenGL rendering
+            glDisable(GL_DEPTH_TEST)
+            
+            # Draw title and FPS
+            title_text = self.font.render("Procify - Process Visualization", True, (255, 255, 255))  # White text
+            self.text_surfaces[self.current_text_surface].blit(title_text, (10, 5))
+
+            # Draw FPS right next to title
+            if self.show_stats:
+                try:
+                    current_fps = min(1000, 1.0 / max(self.min_frame_time, self.avg_frame_time))
+                    fps_text = f"| FPS: {current_fps:.1f} | Frame Time: {self.avg_frame_time*1000:.1f}ms"
+                    fps_surface = self.font.render(fps_text, True, (255, 255, 255))  # White text
+                    self.text_surfaces[self.current_text_surface].blit(fps_surface, (title_text.get_width() + 20, 5))
+                except Exception as e:
+                    logger.error(f"Error rendering performance stats: {str(e)}")
+
+            # Draw controls help with white text
+            help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | P = Toggle Parent Edges | T = Toggle Titles | H = Hide Network Processes | ESC = Exit"
+            help_surface = self.tiny_font.render(help_text, True, (255, 255, 255))
+            self.text_surfaces[self.current_text_surface].blit(help_surface, (10, self.height - 20))
 
             # Render all text at once
             glEnable(GL_BLEND)
