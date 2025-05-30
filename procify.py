@@ -176,17 +176,18 @@ class ProcessVisualizer:
                 pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             ]
             self.current_text_surface = 0
-            self.font = pygame.font.SysFont('Consolas', 20)  # Smaller Consolas font
-            self.small_font = pygame.font.SysFont('Consolas', 16)  # Even smaller for stats
+            self.font = pygame.font.SysFont('Consolas', 12)  # Even smaller main font
+            self.small_font = pygame.font.SysFont('Consolas', 10)  # Smaller stats font
+            self.tiny_font = pygame.font.SysFont('Consolas', 9)  # Tiny font for controls
             
             self.generate_sound_effects()
             
             self.running = True
             self.show_network = True
-            self.show_stats = True
+            self.show_stats = False  # Stats off by default
             self.show_bar_graph = False
-            self.show_titles = False
-            self.hide_network_processes = False  # Option to hide processes with network connections
+            self.show_titles = True  # Titles on by default
+            self.hide_network_processes = False
             self.initial_startup = True
             self.total_processes_monitored = 0
             
@@ -786,10 +787,25 @@ class ProcessVisualizer:
             # Draw all text after OpenGL rendering
             glDisable(GL_DEPTH_TEST)
             
-            # Draw title
-            title_text = self.font.render("Procify - Process Visualization (Drag to move)", True, (200, 200, 200))
+            # Draw title and FPS
+            title_text = self.font.render("Procify - Process Visualization", True, (200, 200, 200))
             self.text_surfaces[self.current_text_surface].blit(title_text, (10, 5))
-            
+
+            # Draw FPS right next to title
+            if self.show_stats:
+                try:
+                    current_fps = min(1000, 1.0 / max(self.min_frame_time, self.avg_frame_time))
+                    fps_text = f"| FPS: {current_fps:.1f} | Frame Time: {self.avg_frame_time*1000:.1f}ms"
+                    fps_surface = self.font.render(fps_text, True, (150, 150, 150))
+                    self.text_surfaces[self.current_text_surface].blit(fps_surface, (title_text.get_width() + 20, 5))
+                except Exception as e:
+                    logger.error(f"Error rendering performance stats: {str(e)}")
+
+            # Draw controls help with tiny font
+            help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | P = Toggle Parent Edges | T = Toggle Titles | H = Hide Network Processes | ESC = Exit"
+            help_surface = self.tiny_font.render(help_text, True, (150, 150, 150))
+            self.text_surfaces[self.current_text_surface].blit(help_surface, (10, self.height - 20))
+
             # Draw process names and stats
             for node in self.nodes.values():
                 if node.pid in visible_processes and node.alpha > 128:
@@ -822,9 +838,9 @@ class ProcessVisualizer:
                             )
                             name_text = self.font.render(f"{node.name} (PID: {node.pid})", True, name_color)
                             
-                            # Calculate text position (above the node)
-                            text_x = int(screen_pos[0] - name_text.get_width() // 2)
-                            text_y = int(screen_pos[1] - node.radius - 20)
+                            # Calculate text position (to the right of the node)
+                            text_x = int(screen_pos[0] + node.radius + 10)
+                            text_y = int(screen_pos[1] - name_text.get_height() // 2)  # Vertically centered
                             
                             # Calculate text alpha for fading
                             text_alpha = 255
@@ -834,40 +850,24 @@ class ProcessVisualizer:
                                 text_alpha = node.alpha
                             
                             # Draw text with background
-                            text_bg = pygame.Surface((name_text.get_width() + 10, 25), pygame.SRCALPHA)
+                            text_bg = pygame.Surface((name_text.get_width() + 10, name_text.get_height() + 4), pygame.SRCALPHA)
                             text_bg.fill((0, 0, 0, int(text_alpha * 0.5)))
-                            self.text_surfaces[self.current_text_surface].blit(text_bg, (text_x - 5, text_y - 5))
+                            self.text_surfaces[self.current_text_surface].blit(text_bg, (text_x - 5, text_y - 2))
                             
                             # Apply alpha to text surface
                             text_surface = name_text.copy()
                             text_surface.set_alpha(int(text_alpha))
                             self.text_surfaces[self.current_text_surface].blit(text_surface, (text_x, text_y))
                             
-                            # Draw stats if enabled
+                            # Draw stats if enabled (below the name)
                             if self.show_stats:
                                 stats_text = f"CPU: {node.cpu_percent:.1f}% MEM: {node.memory_percent:.1f}%"
                                 stats_surface = self.small_font.render(stats_text, True, (150, 150, 150))
                                 stats_surface.set_alpha(int(text_alpha))
-                                stats_x = int(screen_pos[0] - stats_surface.get_width() // 2)
-                                self.text_surfaces[self.current_text_surface].blit(stats_surface, (stats_x, text_y + 20))
+                                self.text_surfaces[self.current_text_surface].blit(stats_surface, (text_x, text_y + name_text.get_height()))
                                     
                     except Exception as e:
                         logger.error(f"Error rendering process text: {str(e)}")
-
-            # Draw performance stats with safety checks
-            if self.show_stats:
-                try:
-                    current_fps = min(1000, 1.0 / max(self.min_frame_time, self.avg_frame_time))
-                    stats_text = f"FPS: {current_fps:.1f} | Frame Time: {self.avg_frame_time*1000:.1f}ms"
-                    stats_surface = self.font.render(stats_text, True, (150, 150, 150))
-                    self.text_surfaces[self.current_text_surface].blit(stats_surface, (10, 40))
-                except Exception as e:
-                    logger.error(f"Error rendering performance stats: {str(e)}")
-
-            # Draw controls help
-            help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | P = Toggle Parent Edges | T = Toggle Titles | H = Hide Network Processes | ESC = Exit"
-            help_surface = self.font.render(help_text, True, (150, 150, 150))
-            self.text_surfaces[self.current_text_surface].blit(help_surface, (10, self.height - 30))
 
             # Render all text at once
             glEnable(GL_BLEND)
