@@ -261,3 +261,6 @@
 2025-05-30 17:17:57,776 - INFO - New process node created - PID: 16440, Name: firefox.exe, Memory: 0.2%
 2025-05-30 17:20:00,610 - INFO - New process node created - PID: 4692, Name: firefox.exe, Memory: 0.2%
 2025-05-30 17:21:00,043 - INFO - New process node created - PID: 11388, Name: firefox.exe, Memory: 0.2%
+2025-05-30 17:21:04,576 - INFO - New process node created - PID: 15472, Name: FileCoAuth.exe, Memory: 0.1%
+2025-05-30 17:21:45,625 - INFO - New process node created - PID: 2776, Name: firefox.exe, Memory: 0.2%
+2025-05-30 17:21:50,896 - INFO - New process node created - PID: 15988, Name: firefox.exe, Memory: 0.2%
