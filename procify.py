@@ -12,6 +12,7 @@ from scipy.io import wavfile
 from OpenGL.GL import *
 from OpenGL.GLU import *
 import pygame.locals as pgl
+import threading
 
 # Set up logging
 log_dir = "logs"
@@ -148,8 +149,10 @@ class ProcessVisualizer:
             self.last_frame_time = pygame.time.get_ticks()
             self.last_process_update = pygame.time.get_ticks()
             self.process_update_interval = 2000  # 2 seconds between process updates
-            self.animation_accumulator = 0
-            self.fixed_time_step = 16.67  # ~60 FPS for physics
+            self.target_fps = 20  # Target 20 FPS for smooth visualization
+            self.frame_time = 1.0 / self.target_fps
+            self.physics_update_interval = 1.0 / 30.0  # 30 Hz physics updates
+            self.fixed_time_step = 1.0 / 30.0  # Fixed physics timestep (30 Hz)
             
             # Initialize other attributes
             self.nodes = {}
@@ -161,10 +164,14 @@ class ProcessVisualizer:
             self.repulsion_strength = 500
             self.attraction_strength = 0.03
             self.max_edge_length = 300
-            self.animation_speed = 0.1  # Reduced from 0.2
+            self.animation_speed = 0.1
             
-            # Create text surface
-            self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            # Create text surface with double buffering
+            self.text_surfaces = [
+                pygame.Surface((self.width, self.height), pygame.SRCALPHA),
+                pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+            ]
+            self.current_text_surface = 0
             self.font = pygame.font.Font(None, 24)
             self.small_font = pygame.font.Font(None, 18)
             
@@ -173,7 +180,7 @@ class ProcessVisualizer:
             self.running = True
             self.show_network = True
             self.show_stats = True
-            self.show_bar_graph = False  # Bar graph toggle
+            self.show_bar_graph = False
             self.initial_startup = True
             self.total_processes_monitored = 0
             
@@ -198,30 +205,116 @@ class ProcessVisualizer:
             # Physics parameters tuning
             self.max_force = 2.0
             self.damping = 0.92
-            self.edge_color = (0.4, 0.4, 0.8, 0.6)  # New: Color for parent edges
+            self.edge_color = (0.4, 0.4, 0.8, 0.6)  # Color for parent edges
             
-            # Timing and update intervals
-            self.last_process_update = time.time()
-            self.last_physics_update = time.time()
-            self.last_frame_time = time.time()
-            self.process_update_interval = 1.0  # 1 second between process updates
-            self.physics_update_interval = 1.0 / 120.0  # 120 Hz physics
-            self.target_fps = 144.0  # Target high FPS for smooth visualization
-            self.frame_time = 1.0 / self.target_fps
-            
-            # Process data buffers
+            # Process data buffers for async updates
             self.process_data_buffer = {}
             self.process_update_in_progress = False
+            self.process_update_thread = None
+            self.process_data_lock = threading.Lock()
             
             # Performance monitoring
-            self.frame_times = [1.0 / self.target_fps]  # Initialize with target frame time
+            self.frame_times = [1.0 / self.target_fps]
             self.max_frame_times = 60
-            self.avg_frame_time = 1.0 / self.target_fps  # Initialize to target frame time
-            self.min_frame_time = 1.0 / 1000.0  # Cap at 1000 FPS to avoid division by zero
+            self.avg_frame_time = 1.0 / self.target_fps
+            self.min_frame_time = 1.0 / 1000.0
+            
+            # OpenGL display lists for static elements
+            self.static_display_lists = {}
+            self.init_display_lists()
             
         except Exception as e:
             logger.error(f"Failed to initialize ProcessVisualizer: {str(e)}")
             raise
+
+    def init_display_lists(self):
+        """Initialize OpenGL display lists for static elements"""
+        # Create display list for circle
+        self.static_display_lists['circle'] = glGenLists(1)
+        glNewList(self.static_display_lists['circle'], GL_COMPILE)
+        segments = 32
+        glBegin(GL_TRIANGLE_FAN)
+        glVertex2f(0, 0)
+        for i in range(segments + 1):
+            angle = i * (2.0 * math.pi / segments)
+            glVertex2f(math.cos(angle), math.sin(angle))
+        glEnd()
+        glEndList()
+
+    def update_process_data_async(self):
+        """Asynchronous process data update"""
+        while self.running:
+            try:
+                if time.time() - self.last_process_update >= 2.0:  # 2 second interval
+                    current_pids = set(p.pid for p in psutil.process_iter(['pid']))
+                    new_process_data = {}
+                    
+                    for pid in current_pids:
+                        try:
+                            proc = psutil.Process(pid)
+                            with proc.oneshot():
+                                new_process_data[pid] = {
+                                    'name': proc.name(),
+                                    'parent_pid': proc.ppid(),
+                                    'cpu_percent': proc.cpu_percent(),
+                                    'memory_percent': proc.memory_percent(),
+                                    'network_connections': proc.connections(),
+                                    'is_new': pid not in self.nodes
+                                }
+                        except (psutil.NoSuchProcess, psutil.AccessDenied):
+                            continue
+                    
+                    with self.process_data_lock:
+                        self.process_data_buffer = new_process_data
+                    
+                    self.last_process_update = time.time()
+                
+                time.sleep(0.1)  # Sleep to prevent high CPU usage
+                
+            except Exception as e:
+                logger.error(f"Error in process update thread: {str(e)}")
+                time.sleep(1)  # Sleep longer on error
+
+    def apply_process_updates(self):
+        """Apply buffered process updates"""
+        with self.process_data_lock:
+            if not self.process_data_buffer:
+                return
+                
+            new_process_data = self.process_data_buffer
+            self.process_data_buffer = {}
+        
+        current_pids = set(new_process_data.keys())
+        
+        # Update nodes from buffer
+        for pid, data in new_process_data.items():
+            if pid not in self.nodes:
+                pos = self.get_spawn_position()
+                self.nodes[pid] = ProcessNode(pid, data['name'], pos, time.time(), is_initial=False)
+                self.total_processes_monitored += 1
+                if not self.initial_startup:
+                    self.start_sound.play()
+            
+            # Update existing node data
+            node = self.nodes[pid]
+            node.parent_pid = data['parent_pid']
+            node.cpu_percent = data['cpu_percent']
+            node.memory_percent = data['memory_percent']
+            node.network_connections = data['network_connections']
+        
+        # Handle terminated processes
+        for pid in list(self.nodes.keys()):
+            if pid not in current_pids:
+                node = self.nodes[pid]
+                if node.alpha == 255:
+                    self.end_sound.play()
+                    node.is_terminating = True
+                    node.color = (1.0, 0.0, 0.0)
+                node.alpha = max(0, node.alpha - 10)
+                if node.alpha <= 0:
+                    del self.nodes[pid]
+        
+        self.initial_startup = False
 
     def generate_sound_effects(self):
         """Generate ascending and descending ping sounds"""
@@ -304,14 +397,15 @@ class ProcessVisualizer:
                     self.show_stats = not self.show_stats
                 elif event.key == pygame.K_b:
                     self.show_bar_graph = not self.show_bar_graph
-                elif event.key == pygame.K_p:  # New: Toggle parent edges
+                elif event.key == pygame.K_p:  # Toggle parent edges
                     self.show_parent_edges = not self.show_parent_edges
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
                     if mouse_pos[1] < self.titlebar_height:
-                        self.window_drag = True
-                        self.drag_offset = mouse_pos
+                        # Instead of trying to move the window, we'll just ignore titlebar clicks
+                        # as window management is platform-dependent
+                        pass
                     else:
                         self.dragging = True
                         self.last_mouse_pos = event.pos
@@ -329,18 +423,8 @@ class ProcessVisualizer:
                     self.drag_velocity = [x * 0.1 for x in self.drag_velocity]
             elif event.type == pygame.MOUSEMOTION:
                 if self.window_drag:
-                    new_pos = pygame.mouse.get_pos()
-                    dx = new_pos[0] - self.drag_offset[0]
-                    dy = new_pos[1] - self.drag_offset[1]
-                    x, y = pygame.display.get_window_position()
-                    try:
-                        pygame.display.set_mode((self.width, self.height), 
-                                              pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE)
-                        os.environ['SDL_VIDEO_WINDOW_POS'] = f"{x + dx},{y + dy}"
-                        self.update_viewport()
-                    except Exception as e:
-                        logger.error(f"Error during window drag: {str(e)}")
-                    self.drag_offset = new_pos
+                    # Remove window dragging functionality as it's not consistently supported
+                    pass
                 elif self.dragging:
                     dx = event.pos[0] - self.last_mouse_pos[0]
                     dy = event.pos[1] - self.last_mouse_pos[1]
@@ -356,7 +440,10 @@ class ProcessVisualizer:
                 try:
                     self.screen = pygame.display.set_mode((self.width, self.height), 
                                                         pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE)
-                    self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+                    self.text_surfaces = [
+                        pygame.Surface((self.width, self.height), pygame.SRCALPHA),
+                        pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+                    ]
                     self.update_viewport()
                 except Exception as e:
                     logger.error(f"Error during resize: {str(e)}")
@@ -365,7 +452,10 @@ class ProcessVisualizer:
                     self.height = event.h
                     self.screen = pygame.display.set_mode((self.width, self.height), 
                                                         pgl.OPENGL | pgl.DOUBLEBUF | pgl.RESIZABLE)
-                    self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+                    self.text_surfaces = [
+                        pygame.Surface((self.width, self.height), pygame.SRCALPHA),
+                        pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+                    ]
                     self.update_viewport()
 
     def draw_circle(self, x, y, radius, color):
@@ -464,7 +554,7 @@ class ProcessVisualizer:
                 # Draw text
                 text = f"{ip}: {frequency}"
                 text_surface = self.small_font.render(text, True, (200, 200, 200))
-                self.text_surface.blit(text_surface, (15 + self.ip_bar_width, y))
+                self.text_surfaces[self.current_text_surface].blit(text_surface, (15 + self.ip_bar_width, y))
 
         except Exception as e:
             logger.error(f"Error drawing bar graph: {str(e)}", exc_info=True)
@@ -574,65 +664,6 @@ class ProcessVisualizer:
                 elif node.pos[1] > max_y:
                     node.velocity[1] += (max_y - node.pos[1]) * 0.1
 
-    def update_process_data(self):
-        """Separate process data update"""
-        current_time = time.time()
-        if current_time - self.last_process_update < self.process_update_interval:
-            return
-            
-        try:
-            current_pids = set(p.pid for p in psutil.process_iter(['pid']))
-            new_process_data = {}
-            
-            for pid in current_pids:
-                try:
-                    proc = psutil.Process(pid)
-                    with proc.oneshot():
-                        new_process_data[pid] = {
-                            'name': proc.name(),
-                            'parent_pid': proc.ppid(),
-                            'cpu_percent': proc.cpu_percent(),
-                            'memory_percent': proc.memory_percent(),
-                            'network_connections': proc.connections(),
-                            'is_new': pid not in self.nodes
-                        }
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    continue
-            
-            # Update nodes from buffer
-            for pid, data in new_process_data.items():
-                if pid not in self.nodes:
-                    pos = self.get_spawn_position()
-                    self.nodes[pid] = ProcessNode(pid, data['name'], pos, time.time(), is_initial=False)
-                    self.total_processes_monitored += 1
-                    if not self.initial_startup:
-                        self.start_sound.play()
-                
-                # Update existing node data
-                node = self.nodes[pid]
-                node.parent_pid = data['parent_pid']
-                node.cpu_percent = data['cpu_percent']
-                node.memory_percent = data['memory_percent']
-                node.network_connections = data['network_connections']
-            
-            # Handle terminated processes
-            for pid in list(self.nodes.keys()):
-                if pid not in current_pids:
-                    node = self.nodes[pid]
-                    if node.alpha == 255:
-                        self.end_sound.play()
-                        node.is_terminating = True
-                        node.color = (1.0, 0.0, 0.0)
-                    node.alpha = max(0, node.alpha - 10)
-                    if node.alpha <= 0:
-                        del self.nodes[pid]
-            
-            self.last_process_update = current_time
-            self.initial_startup = False
-            
-        except Exception as e:
-            logger.error(f"Error updating process data: {str(e)}")
-
     def draw(self):
         """Render the current frame"""
         try:
@@ -641,8 +672,7 @@ class ProcessVisualizer:
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             
             # Create new text surface
-            self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
-            self.text_surface.fill((0, 0, 0, 0))
+            self.text_surfaces[self.current_text_surface].fill((0, 0, 0, 0))
             
             # Set up OpenGL for 2D drawing
             glMatrixMode(GL_PROJECTION)
@@ -745,7 +775,7 @@ class ProcessVisualizer:
             
             # Draw title
             title_text = self.font.render("Procify - Process Visualization (Drag to move)", True, (200, 200, 200))
-            self.text_surface.blit(title_text, (10, 5))
+            self.text_surfaces[self.current_text_surface].blit(title_text, (10, 5))
             
             # Draw process names and stats
             for node in self.nodes.values():
@@ -763,15 +793,15 @@ class ProcessVisualizer:
                         # Draw text with background
                         text_bg = pygame.Surface((name_text.get_width() + 10, 25), pygame.SRCALPHA)
                         text_bg.fill((0, 0, 0, 128))
-                        self.text_surface.blit(text_bg, (text_x - 5, text_y - 5))
-                        self.text_surface.blit(name_text, (text_x, text_y))
+                        self.text_surfaces[self.current_text_surface].blit(text_bg, (text_x - 5, text_y - 5))
+                        self.text_surfaces[self.current_text_surface].blit(name_text, (text_x, text_y))
                         
                         # Draw stats if enabled
                         if self.show_stats:
                             stats_text = f"CPU: {node.cpu_percent:.1f}% MEM: {node.memory_percent:.1f}%"
                             stats_surface = self.small_font.render(stats_text, True, (150, 150, 150))
                             stats_x = int(screen_pos[0] - stats_surface.get_width() // 2)
-                            self.text_surface.blit(stats_surface, (stats_x, text_y + 20))
+                            self.text_surfaces[self.current_text_surface].blit(stats_surface, (stats_x, text_y + 20))
                                     
                     except Exception as e:
                         logger.error(f"Error rendering process text: {str(e)}")
@@ -782,20 +812,20 @@ class ProcessVisualizer:
                     current_fps = min(1000, 1.0 / max(self.min_frame_time, self.avg_frame_time))
                     stats_text = f"FPS: {current_fps:.1f} | Frame Time: {self.avg_frame_time*1000:.1f}ms"
                     stats_surface = self.font.render(stats_text, True, (150, 150, 150))
-                    self.text_surface.blit(stats_surface, (10, 40))
+                    self.text_surfaces[self.current_text_surface].blit(stats_surface, (10, 40))
                 except Exception as e:
                     logger.error(f"Error rendering performance stats: {str(e)}")
 
             # Draw controls help
             help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | P = Toggle Parent Edges | ESC = Exit"
             help_surface = self.font.render(help_text, True, (150, 150, 150))
-            self.text_surface.blit(help_surface, (10, self.height - 30))
+            self.text_surfaces[self.current_text_surface].blit(help_surface, (10, self.height - 30))
 
             # Render all text at once
             glEnable(GL_BLEND)
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
             
-            text_data = pygame.image.tostring(self.text_surface, 'RGBA', True)
+            text_data = pygame.image.tostring(self.text_surfaces[self.current_text_surface], 'RGBA', True)
             glWindowPos2d(0, 0)
             glDrawPixels(self.width, self.height, GL_RGBA, GL_UNSIGNED_BYTE, text_data)
             
@@ -807,9 +837,13 @@ class ProcessVisualizer:
             logger.error(f"Error in draw method: {str(e)}", exc_info=True)
 
     def run(self):
-        """Main loop with separated update cycles"""
+        """Main loop with optimized update cycles"""
         logger.info("Starting process visualization")
         try:
+            # Start process update thread
+            self.process_update_thread = threading.Thread(target=self.update_process_data_async, daemon=True)
+            self.process_update_thread.start()
+            
             # Initial process population
             current_pids = set(p.pid for p in psutil.process_iter())
             for pid in current_pids:
@@ -821,43 +855,49 @@ class ProcessVisualizer:
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue
 
+            physics_accumulator = 0.0
+            last_time = time.time()
+
             while self.running:
-                frame_start = time.time()
+                current_time = time.time()
+                frame_time = current_time - last_time
+                last_time = current_time
+                
+                # Cap frame time to prevent spiral
+                frame_time = min(frame_time, 0.25)
+                physics_accumulator += frame_time
                 
                 # Handle input (needs to be responsive)
                 self.handle_input()
                 
-                # Update process data (runs every second)
-                self.update_process_data()
+                # Apply process updates from buffer
+                self.apply_process_updates()
                 
-                # Update physics (high frequency updates)
-                current_time = time.time()
-                while current_time - self.last_physics_update >= self.physics_update_interval:
+                # Fixed timestep physics updates
+                while physics_accumulator >= self.physics_update_interval:
                     self.apply_layout_forces()
                     self.update_camera()
-                    self.last_physics_update += self.physics_update_interval
-                    if current_time - self.last_physics_update > self.physics_update_interval * 3:
-                        self.last_physics_update = current_time  # Prevent spiral if we fall behind
-                        break
+                    physics_accumulator -= self.physics_update_interval
                 
                 # Render frame
                 self.draw()
                 
-                # Frame timing with safety checks
-                frame_time = max(self.min_frame_time, time.time() - frame_start)
+                # Maintain target frame rate
+                self.clock.tick(self.target_fps)
+                
+                # Update performance metrics
+                frame_time = max(self.min_frame_time, time.time() - current_time)
                 self.frame_times.append(frame_time)
                 if len(self.frame_times) > self.max_frame_times:
                     self.frame_times.pop(0)
-                self.avg_frame_time = max(self.min_frame_time, sum(self.frame_times) / len(self.frame_times))
-                
-                # Sleep to maintain target frame rate
-                sleep_time = max(0, self.frame_time - frame_time)
-                if sleep_time > 0:
-                    time.sleep(sleep_time)
+                self.avg_frame_time = sum(self.frame_times) / len(self.frame_times)
 
         except Exception as e:
             logger.error(f"Error during visualization: {str(e)}", exc_info=True)
         finally:
+            self.running = False
+            if self.process_update_thread:
+                self.process_update_thread.join(timeout=1.0)
             pygame.quit()
 
 if __name__ == "__main__":
