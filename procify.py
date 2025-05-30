@@ -39,14 +39,16 @@ class ProcessNode:
         self.pid = pid
         self.name = name
         self.pos = list(pos)
-        self.target_pos = list(pos)  # Only used for new processes
-        self.velocity = [0.0, 0.0]  # Initialize velocity vector
+        self.target_pos = list(pos)
+        self.velocity = [0.0, 0.0]
         self.creation_time = creation_time
         self.alpha = 255
         self.radius = 5
         self.is_new = not is_initial
         self.time_alive = 0
         self.is_terminating = False
+        self.text_fade_time = 5.0  # Text fades after 5 seconds
+        self.new_process_fade_time = 10.0  # New process status fades after 10 seconds
         # Brighter colors for new processes
         if self.is_new:
             self.color = (
@@ -54,12 +56,14 @@ class ProcessNode:
                 random.randint(180, 255) / 255.0,
                 random.randint(180, 255) / 255.0
             )
+            self.target_color = (0.0, 0.8, 0.0)  # Target green color
         else:
             self.color = (
                 random.randint(50, 150) / 255.0,
                 random.randint(50, 150) / 255.0,
                 random.randint(50, 150) / 255.0
             )
+            self.target_color = self.color
         self.parent_pid = None
         self.cpu_percent = 0.0
         self.memory_percent = 0.0
@@ -172,8 +176,8 @@ class ProcessVisualizer:
                 pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             ]
             self.current_text_surface = 0
-            self.font = pygame.font.Font(None, 24)
-            self.small_font = pygame.font.Font(None, 18)
+            self.font = pygame.font.SysFont('Consolas', 20)  # Smaller Consolas font
+            self.small_font = pygame.font.SysFont('Consolas', 16)  # Even smaller for stats
             
             self.generate_sound_effects()
             
@@ -181,6 +185,8 @@ class ProcessVisualizer:
             self.show_network = True
             self.show_stats = True
             self.show_bar_graph = False
+            self.show_titles = False
+            self.hide_network_processes = False  # Option to hide processes with network connections
             self.initial_startup = True
             self.total_processes_monitored = 0
             
@@ -399,6 +405,10 @@ class ProcessVisualizer:
                     self.show_bar_graph = not self.show_bar_graph
                 elif event.key == pygame.K_p:  # Toggle parent edges
                     self.show_parent_edges = not self.show_parent_edges
+                elif event.key == pygame.K_t:  # Toggle titles
+                    self.show_titles = not self.show_titles
+                elif event.key == pygame.K_h:  # Toggle hiding network processes
+                    self.hide_network_processes = not self.hide_network_processes
             elif event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
                     mouse_pos = pygame.mouse.get_pos()
@@ -698,10 +708,13 @@ class ProcessVisualizer:
             # First, identify processes that should be visible
             visible_processes = set()
             for node in self.nodes.values():
+                has_network = any(conn.status == 'ESTABLISHED' for conn in node.network_connections)
+                if self.hide_network_processes and has_network:
+                    continue
                 if (node.is_new or 
                     node.is_terminating or
                     node.alpha < 255 or 
-                    any(conn.status == 'ESTABLISHED' for conn in node.network_connections)):
+                    (has_network and not self.hide_network_processes)):
                     visible_processes.add(node.pid)
                     # Also add parent if it exists
                     if node.parent_pid in self.nodes:
@@ -781,27 +794,62 @@ class ProcessVisualizer:
             for node in self.nodes.values():
                 if node.pid in visible_processes and node.alpha > 128:
                     screen_pos = self.world_to_screen(node.pos)
+                    
+                    # Update node timing and colors
+                    current_time = time.time()
+                    node.time_alive = current_time - node.creation_time
+                    
+                    # Handle new process transition
+                    if node.is_new and node.time_alive > node.new_process_fade_time:
+                        node.is_new = False
+                        # Interpolate color towards target green
+                        for i in range(3):
+                            node.color = tuple(
+                                c + (node.target_color[i] - c) * 0.1
+                                for i, c in enumerate(node.color)
+                            )
+                    
                     try:
-                        # Render process name with PID
-                        name_color = (255, 255, 100) if node.is_new else (200, 200, 200)
-                        name_text = self.font.render(f"{node.name} (PID: {node.pid})", True, name_color)
+                        # Only render text if show_titles is enabled or the process is new/terminating
+                        should_show_text = (self.show_titles or 
+                                         (node.is_new and node.time_alive < node.text_fade_time) or
+                                         (node.is_terminating and node.alpha > 128))
                         
-                        # Calculate text position (above the node)
-                        text_x = int(screen_pos[0] - name_text.get_width() // 2)
-                        text_y = int(screen_pos[1] - node.radius - 20)
-                        
-                        # Draw text with background
-                        text_bg = pygame.Surface((name_text.get_width() + 10, 25), pygame.SRCALPHA)
-                        text_bg.fill((0, 0, 0, 128))
-                        self.text_surfaces[self.current_text_surface].blit(text_bg, (text_x - 5, text_y - 5))
-                        self.text_surfaces[self.current_text_surface].blit(name_text, (text_x, text_y))
-                        
-                        # Draw stats if enabled
-                        if self.show_stats:
-                            stats_text = f"CPU: {node.cpu_percent:.1f}% MEM: {node.memory_percent:.1f}%"
-                            stats_surface = self.small_font.render(stats_text, True, (150, 150, 150))
-                            stats_x = int(screen_pos[0] - stats_surface.get_width() // 2)
-                            self.text_surfaces[self.current_text_surface].blit(stats_surface, (stats_x, text_y + 20))
+                        if should_show_text:
+                            # Render process name with PID
+                            name_color = (255, 0, 0) if node.is_terminating else (
+                                (255, 255, 100) if node.is_new else (200, 200, 200)
+                            )
+                            name_text = self.font.render(f"{node.name} (PID: {node.pid})", True, name_color)
+                            
+                            # Calculate text position (above the node)
+                            text_x = int(screen_pos[0] - name_text.get_width() // 2)
+                            text_y = int(screen_pos[1] - node.radius - 20)
+                            
+                            # Calculate text alpha for fading
+                            text_alpha = 255
+                            if node.is_new and node.time_alive > node.text_fade_time:
+                                text_alpha = max(0, 255 * (1 - (node.time_alive - node.text_fade_time)))
+                            elif node.is_terminating:
+                                text_alpha = node.alpha
+                            
+                            # Draw text with background
+                            text_bg = pygame.Surface((name_text.get_width() + 10, 25), pygame.SRCALPHA)
+                            text_bg.fill((0, 0, 0, int(text_alpha * 0.5)))
+                            self.text_surfaces[self.current_text_surface].blit(text_bg, (text_x - 5, text_y - 5))
+                            
+                            # Apply alpha to text surface
+                            text_surface = name_text.copy()
+                            text_surface.set_alpha(int(text_alpha))
+                            self.text_surfaces[self.current_text_surface].blit(text_surface, (text_x, text_y))
+                            
+                            # Draw stats if enabled
+                            if self.show_stats:
+                                stats_text = f"CPU: {node.cpu_percent:.1f}% MEM: {node.memory_percent:.1f}%"
+                                stats_surface = self.small_font.render(stats_text, True, (150, 150, 150))
+                                stats_surface.set_alpha(int(text_alpha))
+                                stats_x = int(screen_pos[0] - stats_surface.get_width() // 2)
+                                self.text_surfaces[self.current_text_surface].blit(stats_surface, (stats_x, text_y + 20))
                                     
                     except Exception as e:
                         logger.error(f"Error rendering process text: {str(e)}")
@@ -817,7 +865,7 @@ class ProcessVisualizer:
                     logger.error(f"Error rendering performance stats: {str(e)}")
 
             # Draw controls help
-            help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | P = Toggle Parent Edges | ESC = Exit"
+            help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | P = Toggle Parent Edges | T = Toggle Titles | H = Hide Network Processes | ESC = Exit"
             help_surface = self.font.render(help_text, True, (150, 150, 150))
             self.text_surfaces[self.current_text_surface].blit(help_surface, (10, self.height - 30))
 
