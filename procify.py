@@ -207,6 +207,25 @@ class ProcessVisualizer:
             self.damping = 0.92
             self.edge_color = (0.4, 0.4, 0.8, 0.6)  # New: Color for parent edges
             
+            # Timing and update intervals
+            self.last_process_update = time.time()
+            self.last_physics_update = time.time()
+            self.last_frame_time = time.time()
+            self.process_update_interval = 1.0  # 1 second between process updates
+            self.physics_update_interval = 1.0 / 120.0  # 120 Hz physics
+            self.target_fps = 144.0  # Target high FPS for smooth visualization
+            self.frame_time = 1.0 / self.target_fps
+            
+            # Process data buffers
+            self.process_data_buffer = {}
+            self.process_update_in_progress = False
+            
+            # Performance monitoring
+            self.frame_times = [1.0 / self.target_fps]  # Initialize with target frame time
+            self.max_frame_times = 60
+            self.avg_frame_time = 1.0 / self.target_fps  # Initialize to target frame time
+            self.min_frame_time = 1.0 / 1000.0  # Cap at 1000 FPS to avoid division by zero
+            
         except Exception as e:
             logger.error(f"Failed to initialize ProcessVisualizer: {str(e)}")
             raise
@@ -508,140 +527,73 @@ class ProcessVisualizer:
                 elif node.pos[1] > max_y:
                     node.velocity[1] += (max_y - node.pos[1]) * 0.1
 
-    def update_processes(self):
-        """Update process data at fixed intervals"""
-        current_time = pygame.time.get_ticks()
-        
-        if current_time - self.last_process_update >= self.process_update_interval:
-            self.last_process_update = current_time
-            try:
-                current_pids = set(p.pid for p in psutil.process_iter(['pid']))
-                
-                # Reset IP frequencies each update
-                self.ip_frequencies.clear()
-                
-                # Handle new processes
-                for pid in current_pids:
-                    if pid not in self.nodes:
-                        try:
-                            proc = psutil.Process(pid)
-                            with proc.oneshot():
-                                name = proc.name()
-                                pos = self.get_spawn_position()
-                                self.nodes[pid] = ProcessNode(pid, name, pos, current_time, is_initial=self.initial_startup)
-                                self.total_processes_monitored += 1
-                                if not self.initial_startup:
-                                    logger.info(f"New process detected - PID: {pid}, Name: {name}")
-                                    self.start_sound.play()
-                        except (psutil.NoSuchProcess, psutil.AccessDenied) as e:
-                            continue
-
-                # Handle terminated processes
-                for pid in list(self.nodes.keys()):
-                    if pid not in current_pids:
-                        node = self.nodes[pid]
-                        if node.alpha == 255:
-                            logger.info(f"Process terminated - PID: {pid}, Name: {node.name}")
-                            self.end_sound.play()
-                            node.is_terminating = True
-                            node.color = (1.0, 0.0, 0.0)
-                        node.alpha = max(0, node.alpha - 10)
-                        if node.alpha <= 0:
-                            del self.nodes[pid]
-
-                # Update process info and collect IP frequencies
-                for pid, node in self.nodes.items():
-                    try:
-                        proc = psutil.Process(pid)
-                        with proc.oneshot():
-                            node.cpu_percent = proc.cpu_percent()
-                            node.memory_percent = proc.memory_percent()
-                            node.network_connections = proc.connections()
-                            
-                            # Update IP frequencies
-                            for conn in node.network_connections:
-                                if conn.status == 'ESTABLISHED' and conn.raddr:
-                                    ip = conn.raddr.ip
-                                    self.ip_frequencies[ip] = self.ip_frequencies.get(ip, 0) + 1
-                            
-                            try:
-                                new_io = proc.io_counters()
-                                if node.net_io_counters:
-                                    bytes_sent_delta = new_io.write_bytes - node.last_bytes_sent
-                                    bytes_recv_delta = new_io.read_bytes - node.last_bytes_recv
-                                    activity = (bytes_sent_delta + bytes_recv_delta) / (1024 * 1024)
-                                    node.network_activity = min(1.0, activity)
-                                node.net_io_counters = new_io
-                                node.last_bytes_sent = new_io.write_bytes
-                                node.last_bytes_recv = new_io.read_bytes
-                            except:
-                                node.network_activity *= 0.5
-                    except:
-                        node.network_activity *= 0.5
-                        continue
-
-                    node.time_alive += self.process_update_interval / 1000.0
-                    if node.time_alive >= 5.0:  # 5 seconds highlight duration
-                        node.is_new = False
-                        
-            except Exception as e:
-                logger.error(f"Error updating processes: {str(e)}")
-            
-            self.initial_startup = False
-
-    def draw_bar_graph(self):
-        """Draw bar graph of IP frequencies on the left side"""
-        if not self.ip_frequencies:
+    def update_process_data(self):
+        """Separate process data update"""
+        current_time = time.time()
+        if current_time - self.last_process_update < self.process_update_interval:
             return
             
-        # Sort IPs by frequency
-        sorted_ips = sorted(self.ip_frequencies.items(), key=lambda x: x[1], reverse=True)[:self.max_ip_bars]
-        max_freq = max(freq for _, freq in sorted_ips)
-        
-        # Calculate bar dimensions
-        bar_height = 20
-        total_height = (bar_height + self.ip_bar_margin) * len(sorted_ips)
-        start_y = (self.height - total_height) // 2
-        
-        # Draw background
-        glColor4f(0.1, 0.1, 0.1, 0.8)
-        glBegin(GL_QUADS)
-        glVertex2f(0, start_y - self.ip_bar_margin)
-        glVertex2f(self.ip_bar_width + 150, start_y - self.ip_bar_margin)  # Made wider for IP text
-        glVertex2f(self.ip_bar_width + 150, start_y + total_height + self.ip_bar_margin)
-        glVertex2f(0, start_y + total_height + self.ip_bar_margin)
-        glEnd()
-        
-        # Draw bars and IP text
-        for i, (ip, freq) in enumerate(sorted_ips):
-            y = start_y + i * (bar_height + self.ip_bar_margin)
-            width = (freq / max_freq) * self.ip_bar_width
+        try:
+            current_pids = set(p.pid for p in psutil.process_iter(['pid']))
+            new_process_data = {}
             
-            # Draw bar
-            glColor4f(0.2, 0.6, 1.0, 0.8)
-            glBegin(GL_QUADS)
-            glVertex2f(10, y)
-            glVertex2f(10 + width, y)
-            glVertex2f(10 + width, y + bar_height)
-            glVertex2f(10, y + bar_height)
-            glEnd()
+            for pid in current_pids:
+                try:
+                    proc = psutil.Process(pid)
+                    with proc.oneshot():
+                        new_process_data[pid] = {
+                            'name': proc.name(),
+                            'parent_pid': proc.ppid(),
+                            'cpu_percent': proc.cpu_percent(),
+                            'memory_percent': proc.memory_percent(),
+                            'network_connections': proc.connections(),
+                            'is_new': pid not in self.nodes
+                        }
+                except (psutil.NoSuchProcess, psutil.AccessDenied):
+                    continue
             
-            # Draw frequency number and IP
-            freq_text = self.small_font.render(str(freq), True, (200, 200, 200))
-            ip_text = self.small_font.render(ip, True, (150, 150, 150))
-            self.text_surface.blit(freq_text, (15 + width, y + 2))
-            self.text_surface.blit(ip_text, (self.ip_bar_width + 20, y + 2))  # IP after the bar
+            # Update nodes from buffer
+            for pid, data in new_process_data.items():
+                if pid not in self.nodes:
+                    pos = self.get_spawn_position()
+                    self.nodes[pid] = ProcessNode(pid, data['name'], pos, time.time(), is_initial=False)
+                    self.total_processes_monitored += 1
+                    if not self.initial_startup:
+                        self.start_sound.play()
+                
+                # Update existing node data
+                node = self.nodes[pid]
+                node.parent_pid = data['parent_pid']
+                node.cpu_percent = data['cpu_percent']
+                node.memory_percent = data['memory_percent']
+                node.network_connections = data['network_connections']
+            
+            # Handle terminated processes
+            for pid in list(self.nodes.keys()):
+                if pid not in current_pids:
+                    node = self.nodes[pid]
+                    if node.alpha == 255:
+                        self.end_sound.play()
+                        node.is_terminating = True
+                        node.color = (1.0, 0.0, 0.0)
+                    node.alpha = max(0, node.alpha - 10)
+                    if node.alpha <= 0:
+                        del self.nodes[pid]
+            
+            self.last_process_update = current_time
+            self.initial_startup = False
+            
+        except Exception as e:
+            logger.error(f"Error updating process data: {str(e)}")
 
     def draw(self):
+        """Render the current frame"""
         try:
             # Apply layout forces before drawing
-            self.apply_layout_forces()
-            
-            # Clear both OpenGL and text surface
             glClearColor(0.0, 0.0, 0.0, 1.0)
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
             
-            # Create a new surface each frame
+            # Create new text surface
             self.text_surface = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
             self.text_surface.fill((0, 0, 0, 0))
             
@@ -683,7 +635,7 @@ class ProcessVisualizer:
                             current_pid = self.nodes[current_pid].parent_pid
                             visible_processes.add(current_pid)
 
-            # Draw parent-child edges first (so they appear behind nodes)
+            # Draw parent-child edges first
             if self.show_parent_edges:
                 for node in self.nodes.values():
                     if node.pid in visible_processes and node.parent_pid in self.nodes:
@@ -691,14 +643,12 @@ class ProcessVisualizer:
                         if parent.pid in visible_processes:
                             start_pos = self.world_to_screen(node.pos)
                             end_pos = self.world_to_screen(parent.pos)
-                            # Draw edge with alpha based on node alpha
                             edge_alpha = min(node.alpha, parent.alpha) / 255.0
                             edge_color = (*self.edge_color[:3], edge_alpha)
                             self.draw_line(start_pos, end_pos, edge_color, 1)
 
             # Draw network connections
             if self.show_network:
-                logger.debug("Drawing network connections")
                 for node in self.nodes.values():
                     if node.pid in visible_processes:
                         screen_pos = self.world_to_screen(node.pos)
@@ -723,7 +673,6 @@ class ProcessVisualizer:
                                 
                                 thickness = 1 + int(activity * 3)
                                 self.draw_line(screen_pos, end_pos, color, thickness)
-                                logger.debug(f"Drew network connection for PID {node.pid} to {key}")
 
             # Draw nodes
             for node in self.nodes.values():
@@ -744,7 +693,7 @@ class ProcessVisualizer:
             if self.show_network and self.show_bar_graph:
                 self.draw_bar_graph()
 
-            # Now draw all text after OpenGL rendering
+            # Draw all text after OpenGL rendering
             glDisable(GL_DEPTH_TEST)
             
             # Draw title
@@ -780,10 +729,15 @@ class ProcessVisualizer:
                     except Exception as e:
                         logger.error(f"Error rendering process text: {str(e)}")
 
-            # Draw stats
-            stats_text = f"New: {len(self.nodes) - len(self.nodes) for node in self.nodes.values() if not node.is_new} | Terminating: {len(self.nodes) for node in self.nodes.values() if node.is_terminating} | Zoom: {self.zoom:.1f}x"
-            stats_surface = self.font.render(stats_text, True, (200, 200, 200))
-            self.text_surface.blit(stats_surface, (10, 10))
+            # Draw performance stats with safety checks
+            if self.show_stats:
+                try:
+                    current_fps = min(1000, 1.0 / max(self.min_frame_time, self.avg_frame_time))
+                    stats_text = f"FPS: {current_fps:.1f} | Frame Time: {self.avg_frame_time*1000:.1f}ms"
+                    stats_surface = self.font.render(stats_text, True, (150, 150, 150))
+                    self.text_surface.blit(stats_surface, (10, 40))
+                except Exception as e:
+                    logger.error(f"Error rendering performance stats: {str(e)}")
 
             # Draw controls help
             help_text = "Controls: Mouse Wheel = Zoom | Left Click + Drag = Pan | N = Toggle Network | S = Toggle Stats | B = Toggle Bar Graph | P = Toggle Parent Edges | ESC = Exit"
@@ -795,7 +749,7 @@ class ProcessVisualizer:
             glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
             
             text_data = pygame.image.tostring(self.text_surface, 'RGBA', True)
-            glWindowPos2d(0, 0)  # Use glWindowPos2d instead of glRasterPos2d
+            glWindowPos2d(0, 0)
             glDrawPixels(self.width, self.height, GL_RGBA, GL_UNSIGNED_BYTE, text_data)
             
             glEnable(GL_DEPTH_TEST)
@@ -806,7 +760,7 @@ class ProcessVisualizer:
             logger.error(f"Error in draw method: {str(e)}", exc_info=True)
 
     def run(self):
-        """Main loop with improved timing"""
+        """Main loop with separated update cycles"""
         logger.info("Starting process visualization")
         try:
             # Initial process population
@@ -816,48 +770,47 @@ class ProcessVisualizer:
                     proc = psutil.Process(pid)
                     name = proc.name()
                     pos = self.get_spawn_position()
-                    self.nodes[pid] = ProcessNode(pid, name, pos, pygame.time.get_ticks(), is_initial=True)
+                    self.nodes[pid] = ProcessNode(pid, name, pos, time.time(), is_initial=True)
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue
 
             while self.running:
-                frame_time = pygame.time.get_ticks()
-                dt = frame_time - self.last_frame_time
-                self.last_frame_time = frame_time
+                frame_start = time.time()
                 
-                # Handle input
+                # Handle input (needs to be responsive)
                 self.handle_input()
                 
-                # Update camera position
-                self.update_camera()
+                # Update process data (runs every second)
+                self.update_process_data()
                 
-                # Update processes at fixed interval
-                self.update_processes()
-                
-                # Accumulate time for physics updates
-                self.animation_accumulator += dt
-                
-                # Update physics with fixed timestep
-                num_steps = 0
-                while self.animation_accumulator >= self.fixed_time_step and num_steps < 3:
+                # Update physics (high frequency updates)
+                current_time = time.time()
+                while current_time - self.last_physics_update >= self.physics_update_interval:
                     self.apply_layout_forces()
-                    self.animation_accumulator -= self.fixed_time_step
-                    num_steps += 1
+                    self.update_camera()
+                    self.last_physics_update += self.physics_update_interval
+                    if current_time - self.last_physics_update > self.physics_update_interval * 3:
+                        self.last_physics_update = current_time  # Prevent spiral if we fall behind
+                        break
                 
-                # If we're falling behind, drop frames rather than spiral
-                if self.animation_accumulator > self.fixed_time_step * 3:
-                    self.animation_accumulator = 0
-                
-                # Render
+                # Render frame
                 self.draw()
                 
-                # Cap framerate
-                self.clock.tick(60)
+                # Frame timing with safety checks
+                frame_time = max(self.min_frame_time, time.time() - frame_start)
+                self.frame_times.append(frame_time)
+                if len(self.frame_times) > self.max_frame_times:
+                    self.frame_times.pop(0)
+                self.avg_frame_time = max(self.min_frame_time, sum(self.frame_times) / len(self.frame_times))
+                
+                # Sleep to maintain target frame rate
+                sleep_time = max(0, self.frame_time - frame_time)
+                if sleep_time > 0:
+                    time.sleep(sleep_time)
 
         except Exception as e:
             logger.error(f"Error during visualization: {str(e)}", exc_info=True)
         finally:
-            logger.info(f"Shutting down - Total processes monitored: {self.total_processes_monitored}")
             pygame.quit()
 
 if __name__ == "__main__":
