@@ -117,22 +117,15 @@ class ProcessVisualizer:
             pygame.display.init()
             displays = pygame.display.get_desktop_sizes()
             
-            # Minimum window dimensions
-            self.min_width = 800
-            self.min_height = 600
+            # Set initial window size and minimum dimensions
+            self.width = 1200
+            self.height = 800
+            self.min_width = 400
+            self.min_height = 300
             
-            # Use second monitor if available
-            if len(displays) > 1:
-                self.monitor_index = 1
-                monitor_x = displays[0][0]
-                self.width = min(1200, displays[1][0] - 100)
-                self.height = min(800, displays[1][1] - 100)
-                os.environ['SDL_VIDEO_WINDOW_POS'] = f"{monitor_x + 50},{50}"
-            else:
-                self.monitor_index = 0
-                self.width = min(1200, displays[0][0] - 100)
-                self.height = min(800, displays[0][1] - 100)
-                os.environ['SDL_VIDEO_WINDOW_POS'] = "50,50"
+            # Always use primary monitor
+            self.monitor_index = 0
+            os.environ['SDL_VIDEO_WINDOW_POS'] = "50,50"
             
             self.screen = pygame.display.set_mode(
                 (self.width, self.height),
@@ -421,6 +414,60 @@ class ProcessVisualizer:
             
         except Exception as e:
             logger.error(f"Error drawing line: {str(e)}", exc_info=True)
+
+    def draw_bar_graph(self):
+        """Draw IP frequency bar graph"""
+        try:
+            # Update IP frequencies
+            self.ip_frequencies.clear()
+            for node in self.nodes.values():
+                for conn in node.network_connections:
+                    if conn.status == 'ESTABLISHED' and conn.raddr:
+                        ip = conn.raddr.ip
+                        self.ip_frequencies[ip] = self.ip_frequencies.get(ip, 0) + 1
+
+            if not self.ip_frequencies:
+                return
+
+            # Sort IPs by frequency
+            sorted_ips = sorted(self.ip_frequencies.items(), key=lambda x: x[1], reverse=True)[:self.max_ip_bars]
+
+            # Calculate dimensions
+            bar_height = 15
+            total_height = (bar_height + self.ip_bar_margin) * len(sorted_ips)
+            start_y = self.height - 50 - total_height
+            max_frequency = max(freq for _, freq in sorted_ips)
+
+            # Draw background
+            glColor4f(0.0, 0.0, 0.0, 0.7)
+            glBegin(GL_QUADS)
+            glVertex2f(10, start_y - 10)
+            glVertex2f(self.ip_bar_width + 150, start_y - 10)
+            glVertex2f(self.ip_bar_width + 150, start_y + total_height + 10)
+            glVertex2f(10, start_y + total_height + 10)
+            glEnd()
+
+            # Draw bars and labels
+            for i, (ip, frequency) in enumerate(sorted_ips):
+                y = start_y + i * (bar_height + self.ip_bar_margin)
+                width = (frequency / max_frequency) * self.ip_bar_width
+
+                # Draw bar
+                glColor4f(0.2, 0.6, 1.0, 0.8)
+                glBegin(GL_QUADS)
+                glVertex2f(10, y)
+                glVertex2f(10 + width, y)
+                glVertex2f(10 + width, y + bar_height)
+                glVertex2f(10, y + bar_height)
+                glEnd()
+
+                # Draw text
+                text = f"{ip}: {frequency}"
+                text_surface = self.small_font.render(text, True, (200, 200, 200))
+                self.text_surface.blit(text_surface, (15 + self.ip_bar_width, y))
+
+        except Exception as e:
+            logger.error(f"Error drawing bar graph: {str(e)}", exc_info=True)
 
     def update_camera(self):
         """Smoothly update camera position with reduced lag"""
