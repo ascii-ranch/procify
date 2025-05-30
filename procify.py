@@ -43,14 +43,15 @@ class ProcessNode:
         self.velocity = [0.0, 0.0]
         self.creation_time = creation_time
         self.alpha = 255
-        self.radius = 5
+        self.base_radius = 8  # Increased base radius
+        self.radius = self.base_radius
         self.is_new = not is_initial
         self.time_alive = 0
         self.is_terminating = False
-        self.text_fade_time = 5.0  # Text fades after 5 seconds
-        self.new_process_fade_time = 10.0  # New process status fades after 10 seconds
-        self.flash_frequency = 10.0  # Base flash frequency
-        self.terminating_flash_frequency = 15.0  # Faster flash for terminating
+        self.text_fade_time = 5.0
+        self.new_process_fade_time = 10.0
+        self.flash_frequency = 10.0
+        self.terminating_flash_frequency = 15.0
         # Brighter colors for new processes
         if self.is_new:
             self.color = (
@@ -58,7 +59,7 @@ class ProcessNode:
                 random.randint(180, 255) / 255.0,
                 random.randint(180, 255) / 255.0
             )
-            self.target_color = (0.0, 0.8, 0.0)  # Target green color
+            self.target_color = (0.0, 0.8, 0.0)
         else:
             self.color = (
                 random.randint(50, 150) / 255.0,
@@ -76,7 +77,7 @@ class ProcessNode:
         self.last_bytes_recv = 0
         self.network_activity = 0.0
         self.text_offset = [10, -10]
-        self.connection_endpoints = {}  # Store stable connection endpoints
+        self.connection_endpoints = {}
         
         try:
             proc = psutil.Process(pid)
@@ -104,6 +105,30 @@ class ProcessNode:
     def update(self, current_time: float):
         """Update node state based on current time"""
         self.time_alive = current_time - self.creation_time
+        
+        # Update radius based on CPU usage (between 8 and 30 pixels)
+        target_radius = self.base_radius + (self.cpu_percent / 100.0) * 22
+        # Smooth radius changes
+        self.radius += (target_radius - self.radius) * 0.3
+        
+        # Update network activity
+        try:
+            proc = psutil.Process(self.pid)
+            new_io = proc.io_counters()
+            time_diff = time.time() - self.last_update
+            if time_diff > 0 and self.net_io_counters:
+                bytes_sent_diff = new_io.write_bytes - self.last_bytes_sent
+                bytes_recv_diff = new_io.read_bytes - self.last_bytes_recv
+                # Calculate network activity (bytes per second), normalized between 0 and 1
+                total_bytes_per_sec = (bytes_sent_diff + bytes_recv_diff) / time_diff
+                # More sensitive network activity scale (now 100KB/s instead of 1MB/s)
+                self.network_activity = min(1.0, total_bytes_per_sec / (100 * 1024))
+            self.net_io_counters = new_io
+            self.last_bytes_sent = new_io.write_bytes
+            self.last_bytes_recv = new_io.read_bytes
+            self.last_update = time.time()
+        except (psutil.NoSuchProcess, psutil.AccessDenied):
+            self.network_activity = 0.0
         
         # Calculate flash intensity based on state
         flash_freq = self.terminating_flash_frequency if self.is_terminating else self.flash_frequency
@@ -292,14 +317,25 @@ class ProcessVisualizer:
                         try:
                             proc = psutil.Process(pid)
                             with proc.oneshot():
+                                # Get CPU percent first to initialize it
+                                cpu_percent = proc.cpu_percent()
+                                # Wait a tiny bit to get a real CPU value
+                                time.sleep(0.1)
+                                cpu_percent = proc.cpu_percent()
+                                
                                 new_process_data[pid] = {
                                     'name': proc.name(),
                                     'parent_pid': proc.ppid(),
-                                    'cpu_percent': proc.cpu_percent(),
+                                    'cpu_percent': cpu_percent,
                                     'memory_percent': proc.memory_percent(),
                                     'network_connections': proc.connections(),
                                     'is_new': pid not in self.nodes
                                 }
+                                
+                                # Update existing node's CPU usage immediately if it exists
+                                if pid in self.nodes:
+                                    self.nodes[pid].cpu_percent = cpu_percent
+                                    
                         except (psutil.NoSuchProcess, psutil.AccessDenied):
                             continue
                     
@@ -788,13 +824,25 @@ class ProcessVisualizer:
                                     screen_pos[1] + math.sin(angle) * 50
                                 )
                                 
+                                # Enhanced network activity visualization
                                 activity = node.network_activity
-                                base_color = (0, 150, 255)
-                                pulse = math.sin(time.time() * 10) * 0.5 + 0.5
-                                color = tuple(int(c * (1 + activity * pulse)) for c in base_color)
-                                color = (min(255, color[0])/255.0, min(255, color[1])/255.0, min(255, color[2])/255.0, node.alpha/255.0)
+                                # Faster pulse with more activity, minimum 3Hz
+                                pulse = math.sin(time.time() * (3 + activity * 12)) * 0.5 + 0.5
                                 
-                                thickness = 1 + int(activity * 3)
+                                # Much brighter base colors
+                                intensity = 0.6 + (activity * 0.4)  # Higher base intensity
+                                pulse_intensity = intensity * (0.8 + 0.2 * pulse)  # Less variation in pulse
+                                
+                                # Brighter, more visible colors
+                                color = (
+                                    0.3 * pulse_intensity,  # Some red for better visibility
+                                    0.6 * pulse_intensity,  # More green
+                                    1.0 * pulse_intensity,  # Full blue
+                                    0.8  # Higher base alpha
+                                )
+                                
+                                # Thicker lines
+                                thickness = 2 + int(activity * 4)  # Minimum thickness of 2
                                 self.draw_line(screen_pos, end_pos, color, thickness)
 
             # Draw nodes

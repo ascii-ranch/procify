@@ -273,3 +273,18 @@
 2025-05-30 16:03:25,420 - INFO - New process node created - PID: 13732, Name: firefox.exe, Parent PID: 10652
 2025-05-30 16:04:50,649 - INFO - New process node created - PID: 14388, Name: firefox.exe, Parent PID: 10652
 2025-05-30 16:05:23,292 - INFO - New process node created - PID: 8584, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:06:33,759 - INFO - New process node created - PID: 17268, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:06:38,480 - INFO - New process node created - PID: 5900, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:07:25,223 - INFO - New process node created - PID: 17380, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:08:12,227 - INFO - New process node created - PID: 2348, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:09:26,415 - INFO - New process node created - PID: 3212, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:10:08,761 - INFO - New process node created - PID: 13540, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:11:07,656 - WARNING - Could not get process info for 16548 (FileCoAuth.exe): process PID not found (pid=16548)
+2025-05-30 16:11:26,870 - INFO - New process node created - PID: 11976, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:11:38,194 - INFO - New process node created - PID: 17888, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:13:30,116 - INFO - New process node created - PID: 2576, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:14:07,760 - INFO - New process node created - PID: 3956, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:15:30,893 - INFO - New process node created - PID: 2720, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:16:33,623 - INFO - New process node created - PID: 8824, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:16:38,503 - INFO - New process node created - PID: 2160, Name: firefox.exe, Parent PID: 10652
+2025-05-30 16:17:15,753 - INFO - Received quit signal
